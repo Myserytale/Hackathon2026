@@ -22,11 +22,17 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.count() == 0) {
             System.out.println("Seeding mock users for hackathon...");
             
-            User citizen = new User();
-            citizen.setUsername("fermier_ion");
-            citizen.setPassword(passwordEncoder.encode("parola123"));
-            citizen.setRole(Role.CITIZEN);
-            userRepository.save(citizen);
+            User farmer = new User();
+            farmer.setUsername("fermier_ion");
+            farmer.setPassword(passwordEncoder.encode("parola123"));
+            farmer.setRole(Role.FARMER);
+            userRepository.save(farmer);
+
+            User vet = new User();
+            vet.setUsername("vet_ana");
+            vet.setPassword(passwordEncoder.encode("vet123"));
+            vet.setRole(Role.VET);
+            userRepository.save(vet);
 
             User admin = new User();
             admin.setUsername("admin_maria");

@@ -17,7 +17,7 @@ public class AnimalController {
     private AnimalRepository animalRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('CITIZEN', 'CIVIL_SERVANT', 'SYSTEM')")
+    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT', 'SYSTEM')")
     public List<Animal> getAllAnimals() {
         return animalRepository.findAll();
     }
