@@ -1,6 +1,6 @@
 FROM alpine:3.19
 
-RUN apk add --no-cache postgresql16-client dcron gzip
+RUN apk add --no-cache postgresql16-client gzip
 
 COPY backup.sh /usr/local/bin/backup.sh
 RUN chmod +x /usr/local/bin/backup.sh

@@ -13,7 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Statistics", description = "Dashboard Statistics API")
 @RequestMapping("/api/stats")
 public class StatsController {
 
@@ -27,6 +32,7 @@ public class StatsController {
     private FundingApplicationRepository fundingApplicationRepository;
 
     @GetMapping("/dashboard")
+    @Operation(summary = "Get Dashboard Stats", description = "Retrieves aggregated statistics for the main dashboards.")
     @PreAuthorize("hasAnyRole('ADMIN', 'VET', 'FARMER')")
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();

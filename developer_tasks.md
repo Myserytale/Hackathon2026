@@ -34,7 +34,7 @@ This document breaks down the remaining work into distinct, assignable tracks fo
 *   `[x]` **Incident Notification System:** Implement an endpoint using Server-Sent Events (SSE) or long-polling so the frontend can display real-time popup alerts when a new biological incident is logged by a Vet.
 *   `[x]` **Funding Rules Engine:** Add automated business logic to `FundingApplicationController`. For example, automatically flag or reject a funding application if the farmer has an active disease incident in their herd.
 *   `[x]` **Rate Limiting (Security):** Implement a basic rate limiter (e.g., Bucket4j) on the `/api/auth/login` endpoint to prevent brute-force attacks and demonstrate enterprise-level security to the judges.
-*   `[ ]` **Swagger/OpenAPI Polish:** Add detailed `@Operation`, `@ApiResponse`, and parameter descriptions to all Controllers so the API documentation looks perfectly enterprise-ready.
+*   `[x]` **Swagger/OpenAPI Polish:** Add detailed `@Operation`, `@ApiResponse`, and parameter descriptions to all Controllers so the API documentation looks perfectly enterprise-ready.
 *   `[x]` **Data Export:** Create an endpoint to export the `AuditLog` as a downloadable CSV or PDF file for official civil servant reporting.
 
 ---
