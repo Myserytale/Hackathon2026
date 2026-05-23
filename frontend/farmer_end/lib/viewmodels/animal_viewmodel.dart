@@ -10,6 +10,10 @@ class AnimalViewModel extends ChangeNotifier {
   List<Animal> get animals => _animals;
   bool get isLoading => _isLoading;
 
+  void updateToken(String? token) {
+    _animalService.updateToken(token);
+  }
+
   Map<String, List<Animal>> get categorizedAnimals {
     final Map<String, List<Animal>> categorized = {};
     for (var animal in _animals) {

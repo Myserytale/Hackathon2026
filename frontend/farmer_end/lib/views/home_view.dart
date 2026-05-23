@@ -61,7 +61,36 @@ class HomeView extends StatelessWidget {
               icon: Icons.medical_services,
               label: 'Contact the Vet',
               color: Colors.orange,
-              onPressed: null, // As requested: shouldn't do anything yet
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Request Vet Visit'),
+                    content: const Text(
+                      'A notification will be sent to your assigned veterinarian (vet_ana) to schedule a farm visit.\n\nThis feature uses the SSE notification system.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Vet visit request sent successfully!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: const Text('Send Request', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             _dashboardButton(

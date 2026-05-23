@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../viewmodels/animal_viewmodel.dart';
 
 class OtpVerificationView extends StatefulWidget {
   const OtpVerificationView({super.key});
@@ -26,6 +27,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
 
       if (mounted) {
         if (success) {
+          // Pass token to AnimalViewModel for API calls
+          if (mounted) {
+            context.read<AnimalViewModel>().updateToken(authService.token);
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Successfully authenticated with ROeID!'),
