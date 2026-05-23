@@ -5,6 +5,8 @@ import 'animal_browsing_view.dart';
 import 'report_birth_view.dart';
 import 'funding_application_view.dart';
 import 'report_death_browsing_view.dart';
+import 'vet_portal_view.dart';
+import 'apia_portal_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -104,6 +106,40 @@ class HomeView extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const FundingApplicationView()),
                 );
               },
+            ),
+                ),
+            const SizedBox(height: 20),
+            const Divider(),
+            const Text('HACKATHON DEMO: Switch Portal', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const VetPortalView()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade800, foregroundColor: Colors.white),
+                    child: const Text('Vet Portal'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ApiaPortalView()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade800, foregroundColor: Colors.white),
+                    child: const Text('APIA Portal'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
