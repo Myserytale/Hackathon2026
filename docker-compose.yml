@@ -7,9 +7,14 @@ services:
       POSTGRES_PASSWORD: farmpassword
       POSTGRES_DB: farmdb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U farmuser -d farmdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -21,8 +26,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=farmuser
       - SPRING_DATASOURCE_PASSWORD=farmpassword
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
