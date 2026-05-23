@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface FundingApplicationRepository extends JpaRepository<FundingApplication, Long> {
     List<FundingApplication> findByFarmerId(Long farmerId);
+    List<FundingApplication> findByStatus(String status);
 }

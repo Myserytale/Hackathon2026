@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Random;
 
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Refill;
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -30,8 +35,19 @@ public class AuthController {
     private Map<String, String> otpStorage = new ConcurrentHashMap<>();
     public static String LAST_GENERATED_OTP = "123456"; // For testing
 
+    private final Bucket bucket;
+
+    public AuthController() {
+        Bandwidth limit = Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1)));
+        this.bucket = Bucket.builder().addLimit(limit).build();
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        if (!bucket.tryConsume(1)) {
+            return ResponseEntity.status(429).body("Too many login attempts. Please try again later.");
+        }
+
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
         
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
