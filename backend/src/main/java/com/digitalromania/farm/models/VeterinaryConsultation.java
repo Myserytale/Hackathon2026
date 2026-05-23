@@ -5,12 +5,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import com.digitalromania.farm.config.AuditListener;
 import java.time.LocalDate;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE veterinary_consultation SET deleted = true WHERE id=?")
+@SQLRestriction("deleted=false")
+@EntityListeners(AuditListener.class)
 public class VeterinaryConsultation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +34,6 @@ public class VeterinaryConsultation {
     
     @Column(nullable = false)
     private LocalDate consultationDate;
+
+    private boolean deleted = false;
 }

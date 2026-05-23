@@ -5,12 +5,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import com.digitalromania.farm.config.AuditListener;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE incident SET deleted = true WHERE id=?")
+@SQLRestriction("deleted=false")
+@EntityListeners(AuditListener.class)
 public class Incident {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +34,6 @@ public class Incident {
     
     @Column(nullable = false)
     private String status; // Open, Investigating, Resolved
+
+    private boolean deleted = false;
 }

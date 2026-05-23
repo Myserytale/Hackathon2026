@@ -5,6 +5,7 @@ import com.digitalromania.farm.repositories.AnimalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -16,11 +17,13 @@ public class AnimalController {
     private AnimalRepository animalRepository;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('CITIZEN', 'CIVIL_SERVANT', 'SYSTEM')")
     public List<Animal> getAllAnimals() {
         return animalRepository.findAll();
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('CIVIL_SERVANT')")
     public Animal createAnimal(@RequestBody Animal animal) {
         return animalRepository.save(animal);
     }
