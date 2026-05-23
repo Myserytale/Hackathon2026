@@ -43,6 +43,7 @@ public class IntegrationTests {
     @org.springframework.boot.test.context.TestConfiguration
     static class CacheConfig {
         @org.springframework.context.annotation.Bean
+        @org.springframework.context.annotation.Primary
         public CacheManager cacheManager() {
             return new org.springframework.cache.support.NoOpCacheManager();
         }
