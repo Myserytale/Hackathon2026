@@ -34,7 +34,7 @@ This document breaks down the remaining work into distinct, assignable tracks fo
 
 ## 👨‍🔧 Developer 4: DevOps, Integrations & Polish
 **Focus:** Deployment, infrastructure, and making the architecture look enterprise-ready.
-*   `[ ]` **2FA Notification Mocking:** Hook up the `AuthController` to a real email sandbox (like Mailtrap) or SMS API (like Twilio trial) so the 2FA code is actually delivered to a phone/email during the live demo, replacing the hardcoded `123456`.
-*   `[ ]` **External System Integration (SYSTEM Role):** Create a mock external endpoint (or use a public API) to simulate checking an animal's tag number against a European registry, utilizing the `SYSTEM` role.
-*   `[ ]` **Docker Optimization:** Update `docker-compose.yml` to include `pgadmin4` (so judges can look at the raw database easily) and optionally a Redis container for caching to show performance optimization.
-*   `[ ]` **Live Deployment:** Set up a CI/CD pipeline or manually deploy the Dockerized backend to a free cloud host (e.g., Render, Railway, Fly.io) so the judges can access the API from their own phones.
+*   `[x]` **2FA Notification Mocking:** Hook up the `AuthController` to a real email sandbox (like Mailtrap) or SMS API (like Twilio trial) so the 2FA code is actually delivered to a phone/email during the live demo, replacing the hardcoded `123456`.
+*   `[x]` **External System Integration (SYSTEM Role):** Create a mock external endpoint (or use a public API) to simulate checking an animal's tag number against a European registry, utilizing the `SYSTEM` role.
+*   `[x]` **Docker Optimization:** Update `docker-compose.yml` to include `pgadmin4` (so judges can look at the raw database easily) and optionally a Redis container for caching to show performance optimization.
+*   `[x]` **Live Deployment:** Set up a CI/CD pipeline or manually deploy the Dockerized backend to a free cloud host (e.g., Render, Railway, Fly.io) so the judges can access the API from their own phones.

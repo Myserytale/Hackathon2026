@@ -11,7 +11,10 @@ import com.digitalromania.farm.repositories.UserRepository;
 import com.digitalromania.farm.models.User;
 import com.digitalromania.farm.models.Role;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/animals")
@@ -25,6 +28,7 @@ public class AnimalController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT', 'SYSTEM')")
+    @Cacheable(value = "animals", key = "#authentication.name")
     public List<Animal> getAllAnimals(Authentication authentication) {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow();
@@ -35,8 +39,23 @@ public class AnimalController {
         return animalRepository.findAll();
     }
 
+    @GetMapping("/registry/check/{tagNumber}")
+    @PreAuthorize("hasAnyRole('SYSTEM', 'CIVIL_SERVANT')")
+    public ResponseEntity<?> checkEuropeanRegistry(@PathVariable String tagNumber) {
+        // Mock external API call to European Union TRACES system
+        boolean isRegisteredInEU = tagNumber.startsWith("RO") || tagNumber.startsWith("EU");
+        
+        return ResponseEntity.ok(Map.of(
+            "tagNumber", tagNumber,
+            "registeredInEU", isRegisteredInEU,
+            "status", isRegisteredInEU ? "VERIFIED" : "UNREGISTERED",
+            "lastChecked", java.time.LocalDateTime.now()
+        ));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('CIVIL_SERVANT')")
+    @CacheEvict(value = "animals", allEntries = true)
     public Animal createAnimal(@RequestBody Animal animal) {
         return animalRepository.save(animal);
     }
@@ -50,6 +69,7 @@ public class AnimalController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT')")
+    @CacheEvict(value = "animals", allEntries = true)
     public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @RequestBody Animal animalDetails, Authentication authentication) {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow();
@@ -73,6 +93,7 @@ public class AnimalController {
     }
 
     @DeleteMapping("/{id}")
+    @CacheEvict(value = "animals", allEntries = true)
     public ResponseEntity<?> deleteAnimal(@PathVariable Long id) {
         return animalRepository.findById(id)
                 .map(animal -> {
