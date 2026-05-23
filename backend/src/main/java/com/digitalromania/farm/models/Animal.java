@@ -28,6 +28,11 @@ public class Animal {
     @Column(nullable = false)
     private String species;
 
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private AnimalType type;
+
     private String breed;
     private LocalDate birthDate;
     private String healthStatus;
