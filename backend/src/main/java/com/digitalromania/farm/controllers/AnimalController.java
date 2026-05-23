@@ -64,9 +64,16 @@ public class AnimalController {
     @PostMapping
     @Operation(summary = "Create an animal", description = "Registers a new animal in the system.")
     @ApiResponse(responseCode = "200", description = "Animal created")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FARMER')")
     @CacheEvict(value = "animals", allEntries = true)
-    public Animal createAnimal(@RequestBody Animal animal) {
+    public Animal createAnimal(@RequestBody Animal animal, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        
+        // Farmers can only create animals for themselves
+        if (user.getRole() == Role.FARMER) {
+            animal.setOwnerId(user.getId());
+        }
         return animalRepository.save(animal);
     }
 
