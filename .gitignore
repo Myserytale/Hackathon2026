@@ -2,3 +2,6 @@ backend/.gradle/
 backend/build/
 .idea/
 *.iml
+
+# Database backup dumps (generated every 5 min by db-backup container)
+backups/
