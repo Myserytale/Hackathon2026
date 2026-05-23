@@ -8,6 +8,7 @@ import 'screens/login_screen.dart';
 import 'screens/dashboard_shell.dart';
 import 'screens/subsidies_queue_screen.dart';
 import 'screens/ledger_screen.dart';
+import 'screens/statistics_screen.dart';
 
 void main() {
   runApp(const AdminPortalApp());
@@ -77,6 +78,10 @@ class _AdminPortalRouterState extends State<AdminPortalRouter> {
             GoRoute(
               path: '/ledger',
               builder: (context, state) => const LedgerScreen(),
+            ),
+            GoRoute(
+              path: '/analytics',
+              builder: (context, state) => const StatisticsScreen(),
             ),
           ],
         ),
