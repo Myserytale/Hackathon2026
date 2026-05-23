@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 import '../models/application.dart';
 import '../providers/data_provider.dart';
 
@@ -114,10 +115,8 @@ class FileReviewWizard extends StatelessWidget {
                           label: 'Status Sanitar-Veterinar',
                           isValid: true,
                         ),
-                        const _StatusCheck(
-                          label: 'Înregistrare RNE (ANSVSA)',
-                          isValid: true,
-                        ),
+                        _TracesCheckWidget(tagNumber: application.farmerName.hashCode.toString()),
+                        const SizedBox(height: 12),
                         const _StatusCheck(
                           label: 'Suprafață Teren Validată',
                           isValid: true,
@@ -289,5 +288,48 @@ class _StatusCheck extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _TracesCheckWidget extends StatefulWidget {
+  final String tagNumber;
+  const _TracesCheckWidget({required this.tagNumber});
+  @override
+  State<_TracesCheckWidget> createState() => _TracesCheckWidgetState();
+}
+
+class _TracesCheckWidgetState extends State<_TracesCheckWidget> {
+  bool _isLoading = false;
+  bool? _isValid;
+
+  void _checkTraces() async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8080/api/animals/registry/check/${widget.tagNumber}'));
+      if (response.statusCode == 200) {
+        setState(() => _isValid = true);
+      } else {
+        setState(() => _isValid = false);
+      }
+    } catch (e) {
+      setState(() => _isValid = false);
+    }
+    setState(() => _isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isValid == null) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: ElevatedButton.icon(
+          onPressed: _isLoading ? null : _checkTraces,
+          icon: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.public, size: 20),
+          label: const Text('Verify TRACES EU Registry'),
+          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE3F2FD), foregroundColor: const Color(0xFF1976D2), elevation: 0),
+        ),
+      );
+    }
+    return _StatusCheck(label: 'TRACES EU Registry Validated', isValid: _isValid!);
   }
 }
