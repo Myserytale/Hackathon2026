@@ -17,7 +17,12 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => AnimalViewModel()),
+        ChangeNotifierProxyProvider<AuthService, AnimalViewModel>(
+          create: (_) => AnimalViewModel(),
+          update: (_, authService, animalViewModel) {
+            return animalViewModel!..updateAuth(authService);
+          },
+        ),
       ],
       child: const MyApp(),
     ),

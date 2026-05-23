@@ -54,9 +54,14 @@ public class AnimalController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('CIVIL_SERVANT')")
+    @PreAuthorize("hasAnyRole('FARMER', 'CIVIL_SERVANT')")
     @CacheEvict(value = "animals", allEntries = true)
-    public Animal createAnimal(@RequestBody Animal animal) {
+    public Animal createAnimal(@RequestBody Animal animal, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        if (user.getRole() == Role.FARMER) {
+            animal.setOwnerId(user.getId());
+        }
         return animalRepository.save(animal);
     }
 
@@ -93,10 +98,17 @@ public class AnimalController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('FARMER', 'CIVIL_SERVANT')")
     @CacheEvict(value = "animals", allEntries = true)
-    public ResponseEntity<?> deleteAnimal(@PathVariable Long id) {
+    public ResponseEntity<?> deleteAnimal(@PathVariable Long id, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+
         return animalRepository.findById(id)
                 .map(animal -> {
+                    if (user.getRole() == Role.FARMER && !animal.getOwnerId().equals(user.getId())) {
+                        return ResponseEntity.status(403).build();
+                    }
                     animalRepository.delete(animal);
                     return ResponseEntity.ok().build();
                 })

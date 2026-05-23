@@ -99,7 +99,44 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                         color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    if (context.watch<AuthService>().mockOtpCode != null) ...[
+                      const SizedBox(height: 16),
+                      Card(
+                        color: Colors.green[50],
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Colors.green, width: 1.5),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'DEMO ROeID OTP CODE (LOCAL MOCK)',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.watch<AuthService>().mockOtpCode!,
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 30),
                     TextFormField(
                       controller: _otpController,
                       keyboardType: TextInputType.number,
