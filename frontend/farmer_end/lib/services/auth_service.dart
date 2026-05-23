@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api/auth';
+  static const String baseUrl = 'https://localhost/api/auth';
 
   bool _isAuthenticated = false;
   String? _token;

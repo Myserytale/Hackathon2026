@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class DocumentService {
-  static const String baseUrl = 'http://localhost:8080/api/documents';
+  static const String baseUrl = 'https://localhost/api/documents';
 
   Future<bool> uploadDocument(String animalId, String docType, List<int> fileBytes, String filename) async {
     try {

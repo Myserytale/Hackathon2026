@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api/auth';
+  static const String baseUrl = 'https://localhost/api/auth';
   
   bool _isAuthenticated = false;
   String? _token;
@@ -56,8 +56,8 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> magicLogin() async {
-    await login('vet', 'password');
-    await verifyOtp('123456');
+    await login('vet_ana', 'vet123');
+    // Note: User must still enter the OTP from the backend console!
   }
 
   void logout() {

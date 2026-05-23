@@ -34,5 +34,5 @@ We've built a strict, tiered authorization layer using Spring Security's `@PreAu
    ```bash
    docker-compose up --build
    ```
-3. The API will be available at `http://localhost:8080`.
-4. Access the **Interactive Swagger UI** at `http://localhost:8080/swagger-ui.html`.
+3. The API will be available at `https://localhost/api/`.
+4. Access the **Interactive Swagger UI** at `https://localhost/api/swagger-ui.html`.

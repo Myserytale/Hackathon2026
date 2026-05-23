@@ -39,11 +39,11 @@ Once the server is running, you can access the following useful endpoints:
 
 > [!TIP]
 > **Swagger UI (Interactive API Documentation)**
-> Navigate to [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) in your browser. This will give you an interface to test all the API endpoints (create animals, upload documents, log incidents) without writing a frontend or using Postman.
+> Navigate to [https://localhost/api/swagger-ui.html](https://localhost/api/swagger-ui.html) in your browser. This will give you an interface to test all the API endpoints (create animals, upload documents, log incidents) without writing a frontend or using Postman.
 
 > [!NOTE]
 > **H2 Database Console**
-> Navigate to [http://localhost:8080/h2-console](http://localhost:8080/h2-console).
+> Navigate to [https://localhost/api/h2-console](https://localhost/api/h2-console).
 > - **JDBC URL:** `jdbc:h2:mem:farmdb`
 > - **Username:** `sa`
 > - **Password:** *(leave blank)*

@@ -6,7 +6,7 @@ import '../models/alert.dart';
 import '../models/audit_entry.dart';
 
 class DataService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api';
+  static const String baseUrl = 'https://localhost/api';
   
   List<Alert> _alerts = [];
   final List<AuditEntry> _auditTrail = [];

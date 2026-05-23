@@ -71,6 +71,21 @@ public class AuthController {
         return ResponseEntity.status(401).body("Invalid credentials");
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
+
+        User newUser = new User();
+        newUser.setUsername(request.getUsername());
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        newUser.setRole(com.digitalromania.farm.models.Role.FARMER);
+        
+        userRepository.save(newUser);
+        return ResponseEntity.ok("Registration successful. Please login.");
+    }
+
     @PostMapping("/verify-2fa")
     public ResponseEntity<?> verify2Fa(@RequestBody TwoFaRequest request) {
         String token = request.getTempToken();

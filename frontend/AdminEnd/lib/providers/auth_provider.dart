@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/user.dart';
 
 class AuthProvider extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api/auth';
+  static const String baseUrl = 'https://localhost/api/auth';
   
   AdminUser? _user;
   bool _isAuthenticated = false;
@@ -53,7 +53,7 @@ class AuthProvider extends ChangeNotifier {
         // Extract basic info from token (or just mock it since we know the user)
         _user = AdminUser(
           id: 'ADM-001',
-          name: 'Administrator Sistem',
+          name: 'Maria Ionescu',
           email: 'admin@apia.ro',
           role: 'ADMIN',
           token: finalToken,
@@ -69,13 +69,10 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
-  // Magic Login: Shortcut for demo (directly hits the backend if LAST_GENERATED_OTP is known, 
-  // but here we just simulate a direct success if the backend allows or bypass logic)
+  // Magic Login: Shortcut for demo
   Future<void> magicLogin() async {
-    // For hackathon: we just set the state if backend is mocked, 
-    // or we could do a full flow with hardcoded '123456'
-    await initiateLogin('admin', 'password');
-    await verify2Fa('123456'); // Default testing OTP in AuthController.java
+    await initiateLogin('admin_maria', 'admin123');
+    // Note: User must still enter the OTP from the backend console!
   }
 
   void logout() {
