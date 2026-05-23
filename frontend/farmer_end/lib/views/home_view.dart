@@ -20,9 +20,7 @@ class HomeView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout_rounded),
             tooltip: 'Logout',
-            onPressed: () {
-              Provider.of<AuthService>(context, listen: false).logout();
-            },
+            onPressed: () => _confirmLogout(context),
           ),
         ],
       ),
@@ -165,24 +163,45 @@ class HomeView extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text('Are you sure you want to disconnect from the farmer portal?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      Provider.of<AuthService>(context, listen: false).logout();
+    }
+  }
+
   Widget _dashboardButton(
     BuildContext context, {
     required IconData icon,
     required String label,
     required Color color,
-    required VoidCallback? onPressed,
+    required VoidCallback onPressed,
   }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        backgroundColor: onPressed == null ? Colors.grey[300] : color.withOpacity(0.1),
-        foregroundColor: onPressed == null ? Colors.grey[600] : color,
+        backgroundColor: color.withOpacity(0.1),
+        foregroundColor: color,
         elevation: 0,
-        side: BorderSide(
-          color: onPressed == null ? Colors.grey[400]! : color,
-          width: 2,
-        ),
+        side: BorderSide(color: color, width: 2),
       ),
       onPressed: onPressed,
       child: Row(
@@ -196,12 +215,6 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showPlaceholder(BuildContext context, String title) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$title feature coming soon!')),
     );
   }
 }

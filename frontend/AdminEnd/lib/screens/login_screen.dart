@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _show2FA = true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Eroare: Credențiale invalide sau backend offline')),
+        SnackBar(content: Text(context.read<AuthProvider>().errorMessage ?? 'Eroare: Credențiale invalide sau backend offline')),
       );
     }
   }
@@ -133,6 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? const CircularProgressIndicator(color: Colors.white)
                             : const Text('Autentificare ROeID'),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => context.go('/register'),
+                      child: const Text('Nu ai cont? Înregistrează-te'),
                     ),
                   ] else ...[
                     const Text(

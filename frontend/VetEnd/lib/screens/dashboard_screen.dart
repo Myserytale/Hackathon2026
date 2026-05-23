@@ -46,9 +46,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () => context.read<AuthService>().logout(),
+            onPressed: () => _confirmLogout(context),
             icon: const Icon(Icons.logout),
-            tooltip: "Logout",
+            tooltip: "Deconectare",
           ),
         ],
       ),
@@ -72,6 +72,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Deconectare'),
+        content: const Text('Sigur doriți să vă deconectați din portalul veterinar?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Anulează'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Deconectare'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<AuthService>().logout();
+    }
   }
 }
 

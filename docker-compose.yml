@@ -130,6 +130,9 @@ services:
     restart: always
     depends_on:
       - backend
+      - farmer-frontend
+      - vet-frontend
+      - admin-frontend
 
 volumes:
   postgres_data:

@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api/auth';
+  static String get baseUrl => ApiConfig.authBaseUrl;
 
   bool _isAuthenticated = false;
   String? _token;
@@ -17,6 +18,15 @@ class AuthService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  String _parseError(http.Response response) {
+    final body = response.body.trim();
+    if (body.isNotEmpty) return body;
+    if (response.statusCode == 403) {
+      return 'Server rejected the request. Rebuild Docker: docker-compose up -d --build';
+    }
+    return 'Request failed (${response.statusCode})';
+  }
+
   Future<bool> register(String username, String password) async {
     _isLoading = true;
     _errorMessage = null;
@@ -26,21 +36,24 @@ class AuthService extends ChangeNotifier {
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'role': 'FARMER',
+        }),
       );
 
       _isLoading = false;
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         notifyListeners();
         return true;
-      } else {
-        _errorMessage = response.body;
-        notifyListeners();
-        return false;
       }
+      _errorMessage = _parseError(response);
+      notifyListeners();
+      return false;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Connection error: $e';
+      _errorMessage = 'Cannot reach the server. Rebuild with: docker-compose up -d --build';
       notifyListeners();
       return false;
     }
@@ -55,7 +68,11 @@ class AuthService extends ChangeNotifier {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'expectedRole': 'FARMER',
+        }),
       );
 
       _isLoading = false;
@@ -64,14 +81,13 @@ class AuthService extends ChangeNotifier {
         _tempToken = data['token'];
         notifyListeners();
         return true;
-      } else {
-        _errorMessage = response.body;
-        notifyListeners();
-        return false;
       }
+      _errorMessage = _parseError(response);
+      notifyListeners();
+      return false;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Connection error: $e';
+      _errorMessage = 'Cannot reach the server. Rebuild with: docker-compose up -d --build';
       notifyListeners();
       return false;
     }
@@ -102,14 +118,13 @@ class AuthService extends ChangeNotifier {
         _tempToken = null;
         notifyListeners();
         return true;
-      } else {
-        _errorMessage = response.body;
-        notifyListeners();
-        return false;
       }
+      _errorMessage = _parseError(response);
+      notifyListeners();
+      return false;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Connection error: $e';
+      _errorMessage = 'Cannot reach the server. Rebuild with: docker-compose up -d --build';
       notifyListeners();
       return false;
     }

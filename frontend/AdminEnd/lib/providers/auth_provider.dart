@@ -1,26 +1,66 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/user.dart';
 
 class AuthProvider extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api/auth';
-  
+  static String get baseUrl => ApiConfig.authBaseUrl;  
   AdminUser? _user;
   bool _isAuthenticated = false;
-  String? _tempToken; // For 2FA step
+  String? _tempToken;
+  String? _errorMessage;
 
   AdminUser? get user => _user;
   bool get isAuthenticated => _isAuthenticated;
   String? get tempToken => _tempToken;
+  String? get errorMessage => _errorMessage;
+
+  String _parseError(http.Response response) {
+    final body = response.body.trim();
+    if (body.isNotEmpty) return body;
+    if (response.statusCode == 403) {
+      return 'Server rejected the request. Rebuild Docker: docker-compose up -d --build';
+    }
+    return 'Request failed (${response.statusCode})';
+  }
+
+  Future<bool> register(String username, String password) async {
+    _errorMessage = null;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'role': 'ADMIN',
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+      _errorMessage = _parseError(response);
+    } catch (e) {
+      _errorMessage = 'Cannot reach the server. Rebuild with: docker-compose up -d --build';
+      debugPrint('Register error: $e');
+    }
+    return false;
+  }
 
   // Step 1: Login with credentials
   Future<bool> initiateLogin(String username, String password) async {
+    _errorMessage = null;
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'expectedRole': 'ADMIN',
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -29,7 +69,9 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       }
+      _errorMessage = _parseError(response);
     } catch (e) {
+      _errorMessage = 'Cannot reach the server. Rebuild with: docker-compose up -d --build';
       debugPrint('Login initiation error: $e');
     }
     return false;
@@ -69,13 +111,9 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
-  // Magic Login: Shortcut for demo (directly hits the backend if LAST_GENERATED_OTP is known, 
-  // but here we just simulate a direct success if the backend allows or bypass logic)
   Future<void> magicLogin() async {
-    // For hackathon: we just set the state if backend is mocked, 
-    // or we could do a full flow with hardcoded '123456'
-    await initiateLogin('admin', 'password');
-    await verify2Fa('123456'); // Default testing OTP in AuthController.java
+    await initiateLogin('admin_maria', 'admin123');
+    await verify2Fa('123456');
   }
 
   void logout() {
