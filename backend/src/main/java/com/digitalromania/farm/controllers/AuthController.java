@@ -16,7 +16,6 @@ import java.util.Random;
 
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Refill;
 import java.time.Duration;
 
 @RestController
@@ -38,7 +37,10 @@ public class AuthController {
     private final Bucket bucket;
 
     public AuthController() {
-        Bandwidth limit = Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1)));
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(5)
+                .refillGreedy(5, Duration.ofMinutes(1))
+                .build();
         this.bucket = Bucket.builder().addLimit(limit).build();
     }
 
