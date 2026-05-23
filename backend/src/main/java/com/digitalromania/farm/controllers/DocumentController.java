@@ -5,8 +5,12 @@ import com.digitalromania.farm.repositories.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
+import java.util.UUID;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -25,9 +29,23 @@ public class DocumentController {
         return documentRepository.findByAnimalId(animalId);
     }
 
-    @PostMapping
-    public Document createDocument(@RequestBody Document document) {
-        return documentRepository.save(document);
+    @PostMapping(consumes = {"multipart/form-data"})
+    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT')")
+    public ResponseEntity<Document> uploadDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("animalId") Long animalId,
+            @RequestParam("type") String type) {
+        
+        // Mocking an S3/Blob storage upload
+        String mockUrl = "https://cdn.digitalromania.ro/docs/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        Document doc = new Document();
+        doc.setAnimalId(animalId);
+        doc.setType(type);
+        doc.setDocumentUrl(mockUrl);
+        doc.setUploadDate(LocalDate.now());
+        
+        return ResponseEntity.ok(documentRepository.save(doc));
     }
 
     @GetMapping("/{id}")
