@@ -2,10 +2,12 @@ package com.digitalromania.farm.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "app.database-schema-fixer.enabled", havingValue = "true", matchIfMissing = true)
 public class DatabaseSchemaFixer implements CommandLineRunner {
 
     @Autowired

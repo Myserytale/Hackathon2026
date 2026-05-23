@@ -45,11 +45,6 @@ jobs:
 
     - name: Build and Test with Gradle
       working-directory: ./backend
-      env:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/farmdb
-        SPRING_DATASOURCE_USERNAME: farmuser
-        SPRING_DATASOURCE_PASSWORD: farmpassword
-        SPRING_REDIS_HOST: localhost
       run: ./gradlew build --no-daemon
 
     - name: Build Docker Image
