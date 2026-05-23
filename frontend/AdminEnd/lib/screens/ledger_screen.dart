@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+// import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/data_provider.dart';
@@ -16,7 +16,7 @@ class LedgerScreen extends StatelessWidget {
       children: [
         const Row(
           children: [
-            Icon(LucideIcons.shieldCheck, size: 28),
+            Icon(Icons.security, size: 28),
             SizedBox(width: 12),
             Text(
               'Audit Transparență & Ledger Imutabil',
@@ -53,7 +53,7 @@ class LedgerScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        LucideIcons.lock,
+                        Icons.lock,
                         size: 20,
                         color: Color(0xFF1A1A1A),
                       ),
@@ -128,7 +128,7 @@ class LedgerScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 const Icon(
-                                  LucideIcons.copy,
+                                  Icons.copy,
                                   size: 14,
                                   color: Colors.grey,
                                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/animal.dart';
+import '../services/document_service.dart';
 
 class AnimalDetailView extends StatelessWidget {
   final Animal animal;
@@ -35,6 +36,45 @@ class AnimalDetailView extends StatelessWidget {
             _infoRow(Icons.calendar_today, 'Birth Date', birthDateStr),
             _infoRow(Icons.health_and_safety, 'Health Status', animal.healthStatus),
             _infoRow(Icons.person, 'Owner ID', animal.ownerId?.toString() ?? 'Unknown'),
+            const SizedBox(height: 32),
+            Center(
+              child: Semantics(
+                label: 'Upload Animal Passport or Movement Document',
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text('Upload Document'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Simulating file selection...')),
+                    );
+                    
+                    // Mocking file bytes for hackathon demonstration
+                    List<int> mockFileBytes = [0, 1, 2, 3];
+                    
+                    bool success = await DocumentService().uploadDocument(
+                      animal.id.toString(),
+                      'PASSPORT',
+                      mockFileBytes,
+                      'mock_passport.pdf',
+                    );
+                    
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(success ? 'Document Uploaded via MultipartFormData!' : 'Upload Failed. Ensure Backend is running.'),
+                          backgroundColor: success ? Colors.green : Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),

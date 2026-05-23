@@ -38,7 +38,7 @@ dependencies:
   go_router: ^17.2.3
   google_fonts: ^8.1.0
   intl: ^0.20.2
-  lucide_icons: ^0.257.0
+  # lucide_icons: ^0.257.0
   crypto: ^3.0.7
   http: ^1.6.0
 

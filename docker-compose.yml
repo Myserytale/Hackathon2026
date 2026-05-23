@@ -16,6 +16,27 @@ services:
       timeout: 5s
       retries: 5
 
+  farmer-frontend:
+    build:
+      context: ./frontend/farmer_end
+    ports:
+      - "8081:80"
+    restart: always
+
+  vet-frontend:
+    build:
+      context: ./frontend/VetEnd
+    ports:
+      - "8082:80"
+    restart: always
+
+  admin-frontend:
+    build:
+      context: ./frontend/AdminEnd
+    ports:
+      - "8083:80"
+    restart: always
+
   backend:
     build:
       context: ./backend

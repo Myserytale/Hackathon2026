@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+// import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      LucideIcons.landmark,
+                      Icons.account_balance,
                       color: Colors.white,
                       size: 40,
                     ),
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _emailController,
                       decoration: const InputDecoration(
                         labelText: 'Email Oficial',
-                        prefixIcon: Icon(LucideIcons.mail),
+                        prefixIcon: Icon(Icons.mail),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: true,
                       decoration: const InputDecoration(
                         labelText: 'Parolă',
-                        prefixIcon: Icon(LucideIcons.lock),
+                        prefixIcon: Icon(Icons.lock),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Opacity(
               opacity: 0.05,
               child: IconButton(
-                icon: const Icon(LucideIcons.wand2),
+                icon: const Icon(Icons.auto_fix_high),
                 onPressed: () {
                   context.read<AuthProvider>().magicLogin();
                 },

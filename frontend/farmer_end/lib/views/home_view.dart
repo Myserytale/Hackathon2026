@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import 'animal_browsing_view.dart';
 import 'report_birth_view.dart';
+import 'funding_application_view.dart';
 import 'report_death_browsing_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -61,6 +62,19 @@ class HomeView extends StatelessWidget {
               label: 'Contact the Vet',
               color: Colors.orange,
               onPressed: null, // As requested: shouldn't do anything yet
+            ),
+            const SizedBox(height: 20),
+            _dashboardButton(
+              context,
+              icon: Icons.monetization_on,
+              label: 'Apply for Subsidy (APIA)',
+              color: Colors.purple,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FundingApplicationView()),
+                );
+              },
             ),
           ],
         ),

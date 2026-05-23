@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+// import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/application.dart';
@@ -24,7 +24,7 @@ class FileReviewWizard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(LucideIcons.fileSearch, size: 28),
+                const Icon(Icons.find_in_page, size: 28),
                 const SizedBox(width: 12),
                 Text(
                   'Analiză Dosar: ${application.id}',
@@ -36,7 +36,7 @@ class FileReviewWizard extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(LucideIcons.x),
+                  icon: const Icon(Icons.close),
                 ),
               ],
             ),
@@ -250,7 +250,7 @@ class _DocumentItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.fileText, size: 18, color: Color(0xFF1976D2)),
+          const Icon(Icons.description, size: 18, color: Color(0xFF1976D2)),
           const SizedBox(width: 12),
           Text(
             name,
@@ -260,7 +260,7 @@ class _DocumentItem extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(LucideIcons.eye, size: 16, color: Color(0xFF1976D2)),
+          const Icon(Icons.remove_red_eye, size: 16, color: Color(0xFF1976D2)),
         ],
       ),
     );
@@ -280,7 +280,7 @@ class _StatusCheck extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            isValid ? LucideIcons.checkCircle2 : LucideIcons.alertCircle,
+            isValid ? Icons.check_circle_outline : Icons.error_outline,
             color: isValid ? Colors.green : Colors.red,
             size: 20,
           ),
