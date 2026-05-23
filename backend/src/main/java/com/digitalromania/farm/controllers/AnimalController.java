@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import com.digitalromania.farm.repositories.UserRepository;
+import com.digitalromania.farm.models.User;
+import com.digitalromania.farm.models.Role;
 
 import java.util.List;
 
@@ -16,9 +20,18 @@ public class AnimalController {
     @Autowired
     private AnimalRepository animalRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping
     @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT', 'SYSTEM')")
-    public List<Animal> getAllAnimals() {
+    public List<Animal> getAllAnimals(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        
+        if (user.getRole() == Role.FARMER) {
+            return animalRepository.findByOwnerId(user.getId());
+        }
         return animalRepository.findAll();
     }
 
@@ -36,15 +49,24 @@ public class AnimalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @RequestBody Animal animalDetails) {
+    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT')")
+    public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @RequestBody Animal animalDetails, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+
         return animalRepository.findById(id)
                 .map(animal -> {
+                    if (user.getRole() == Role.FARMER && !animal.getOwnerId().equals(user.getId())) {
+                        return ResponseEntity.status(403).<Animal>build();
+                    }
                     animal.setTagNumber(animalDetails.getTagNumber());
                     animal.setSpecies(animalDetails.getSpecies());
                     animal.setBreed(animalDetails.getBreed());
                     animal.setBirthDate(animalDetails.getBirthDate());
                     animal.setHealthStatus(animalDetails.getHealthStatus());
-                    animal.setOwnerId(animalDetails.getOwnerId());
+                    if (user.getRole() != Role.FARMER) {
+                        animal.setOwnerId(animalDetails.getOwnerId());
+                    }
                     return ResponseEntity.ok(animalRepository.save(animal));
                 })
                 .orElse(ResponseEntity.notFound().build());
