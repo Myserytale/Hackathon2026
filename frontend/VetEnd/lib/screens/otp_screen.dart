@@ -35,11 +35,11 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
               const SizedBox(height: 48),
               Pinput(
-                length: 4,
+                length: 6,
                 defaultPinTheme: PinTheme(
-                  width: 80,
-                  height: 80,
-                  textStyle: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  width: 60,
+                  height: 70,
+                  textStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppTheme.charcoal, width: 2),
                     borderRadius: BorderRadius.circular(12),
@@ -55,7 +55,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Cod incorect (Incearcă 1234)")),
+                      const SnackBar(content: Text("Cod incorect")),
                     );
                   }
                 },

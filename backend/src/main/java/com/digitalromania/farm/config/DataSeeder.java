@@ -23,8 +23,8 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("Seeding mock users for hackathon...");
             
             User farmer = new User();
-            farmer.setUsername("fermier_ion");
-            farmer.setPassword(passwordEncoder.encode("parola123"));
+            farmer.setUsername("test_farmer");
+            farmer.setPassword(passwordEncoder.encode("password123"));
             farmer.setRole(Role.FARMER);
             userRepository.save(farmer);
 
