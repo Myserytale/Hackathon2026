@@ -4,7 +4,7 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
-RUN chmod +x ./gradlew
+RUN chmod +x ./gradlew && sed -i 's/\r$//' ./gradlew
 # Download dependencies
 RUN ./gradlew dependencies --no-daemon
 COPY src src
