@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+// import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
@@ -53,7 +53,7 @@ class Sidebar extends StatelessWidget {
             padding: const EdgeInsets.all(32),
             child: const Row(
               children: [
-                Icon(LucideIcons.landmark, color: Colors.white, size: 28),
+                Icon(Icons.account_balance, color: Colors.white, size: 28),
                 SizedBox(width: 12),
                 Text(
                   'APIA Portal',
@@ -68,26 +68,26 @@ class Sidebar extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _NavItem(
-            icon: LucideIcons.layoutDashboard,
+            icon: Icons.dashboard,
             label: 'Coada Subvenții',
             isSelected: location == '/',
             onTap: () => context.go('/'),
           ),
           _NavItem(
-            icon: LucideIcons.history,
+            icon: Icons.history,
             label: 'Audit Transparență',
             isSelected: location == '/ledger',
             onTap: () => context.go('/ledger'),
           ),
           const Spacer(),
           _NavItem(
-            icon: LucideIcons.settings,
+            icon: Icons.settings,
             label: 'Setări Sistem',
             isSelected: false,
             onTap: () {},
           ),
           _NavItem(
-            icon: LucideIcons.logOut,
+            icon: Icons.logout,
             label: 'Deconectare',
             isSelected: false,
             onTap: () => context.read<AuthProvider>().logout(),
@@ -191,7 +191,7 @@ class TopHeader extends StatelessWidget {
           const SizedBox(width: 12),
           const CircleAvatar(
             backgroundColor: Color(0xFFEEEEEE),
-            child: Icon(LucideIcons.user, size: 20, color: Colors.grey),
+            child: Icon(Icons.person, size: 20, color: Colors.grey),
           ),
         ],
       ),

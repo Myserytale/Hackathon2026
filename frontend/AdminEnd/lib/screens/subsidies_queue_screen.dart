@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+// import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/data_provider.dart';
@@ -27,7 +27,7 @@ class SubsidiesQueueScreen extends StatelessWidget {
             const Spacer(),
             ElevatedButton.icon(
               onPressed: () => data.loadInitialData(),
-              icon: const Icon(LucideIcons.rotateCcw, size: 16),
+              icon: const Icon(Icons.refresh, size: 16),
               label: const Text('Refresh'),
             ),
           ],
@@ -44,7 +44,7 @@ class SubsidiesQueueScreen extends StatelessWidget {
                     .where((a) => a.status == ApplicationStatus.pending)
                     .length
                     .toString(),
-                icon: LucideIcons.fileClock,
+                icon: Icons.schedule,
                 color: const Color(0xFF0277BD),
               ),
             ),
@@ -56,7 +56,7 @@ class SubsidiesQueueScreen extends StatelessWidget {
                     .where((a) => a.status == ApplicationStatus.approved)
                     .length
                     .toString(),
-                icon: LucideIcons.checkCircle,
+                icon: Icons.check_circle,
                 color: const Color(0xFF2E7D32),
               ),
             ),
@@ -70,7 +70,7 @@ class SubsidiesQueueScreen extends StatelessWidget {
                     (sum, a) => sum + a.requestedAmount,
                   ),
                 ),
-                icon: LucideIcons.euro,
+                icon: Icons.euro,
                 color: const Color(0xFF1A1A1A),
               ),
             ),
@@ -179,7 +179,7 @@ class SubsidiesQueueScreen extends StatelessWidget {
                                         child: const Text('Review Dosar'),
                                       )
                                     : const Icon(
-                                        LucideIcons.check,
+                                        Icons.check,
                                         color: Colors.green,
                                       ),
                               ),

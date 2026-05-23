@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Romania - Farm Animal Management</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #16191e;
+            font-family: 'Inter', sans-serif;
+            color: #d8dee9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: #88c0d0;
+            text-shadow: 0 0 10px rgba(136, 192, 208, 0.3);
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            color: #e5e9f0;
+        }
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            width: 90%;
+        }
+        .portal-card {
+            background: #2e3440;
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: #eceff4;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .portal-card.farmer:hover {
+            border-color: #a3be8c;
+            box-shadow: 0 10px 20px rgba(163, 190, 140, 0.2);
+        }
+        .portal-card.vet:hover {
+            border-color: #ebcb8b;
+            box-shadow: 0 10px 20px rgba(235, 203, 139, 0.2);
+        }
+        .portal-card.admin:hover {
+            border-color: #bf616a;
+            box-shadow: 0 10px 20px rgba(191, 97, 106, 0.2);
+        }
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .desc {
+            font-size: 0.95rem;
+            color: #d8dee9;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Digital Romania</h1>
+    <p>Unified Farm Animal Management System</p>
+    
+    <div class="portal-grid">
+        <a href="/farmer/" class="portal-card farmer">
+            <div class="icon">🚜</div>
+            <div class="title">Farmer Portal</div>
+            <div class="desc">Digital Wallet & Subsidy Status</div>
+        </a>
+        
+        <a href="/vet/" class="portal-card vet">
+            <div class="icon">🩺</div>
+            <div class="title">Veterinary Portal</div>
+            <div class="desc">Health Certificates & Status Tracking</div>
+        </a>
+        
+        <a href="/admin/" class="portal-card admin">
+            <div class="icon">🏛️</div>
+            <div class="title">APIA Bureaucracy</div>
+            <div class="desc">Subsidy Validation & Processing</div>
+        </a>
+    </div>
+</body>
+</html>
