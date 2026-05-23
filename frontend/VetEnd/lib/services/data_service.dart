@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/api_config.dart';
 import '../models/alert.dart';
 import '../models/audit_entry.dart';
 
 class DataService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api';
+  static String get baseUrl => ApiConfig.apiBaseUrl;
   
   List<Alert> _alerts = [];
   final List<AuditEntry> _auditTrail = [];

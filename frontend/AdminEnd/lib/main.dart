@@ -5,6 +5,7 @@ import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/data_provider.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/dashboard_shell.dart';
 import 'screens/subsidies_queue_screen.dart';
 import 'screens/ledger_screen.dart';
@@ -51,12 +52,14 @@ class _AdminPortalRouterState extends State<AdminPortalRouter> {
       redirect: (context, state) {
         final auth = authProvider;
         final loggingIn = state.matchedLocation == '/login';
+        final registering = state.matchedLocation == '/register';
 
         if (!auth.isAuthenticated) {
-          return loggingIn ? null : '/login';
+          if (loggingIn || registering) return null;
+          return '/login';
         }
 
-        if (loggingIn) {
+        if (loggingIn || registering) {
           return '/';
         }
 
@@ -66,6 +69,10 @@ class _AdminPortalRouterState extends State<AdminPortalRouter> {
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen(),
         ),
         ShellRoute(
           builder: (context, state, child) => DashboardShell(child: child),

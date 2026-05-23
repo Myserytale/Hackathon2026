@@ -79,7 +79,11 @@ public class IntegrationTests {
     @Test
     void test2FAFlow() throws Exception {
         // Step 1: Login
-        Map<String, String> loginRequest = Map.of("username", "test_farmer", "password", "password123");
+        Map<String, String> loginRequest = Map.of(
+                "username", "test_farmer",
+                "password", "password123",
+                "expectedRole", "FARMER"
+        );
         
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -103,6 +107,62 @@ public class IntegrationTests {
         Map<String, String> verifyResponse = objectMapper.readValue(verifyResult.getResponse().getContentAsString(), Map.class);
         String finalToken = verifyResponse.get("token");
         assertThat(finalToken).isNotNull();
+    }
+
+    @Test
+    void testRegisterAndLoginAsFarmer() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "username", "new_farmer",
+                "password", "secret123",
+                "role", "FARMER"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isCreated());
+
+        assertThat(userRepository.findByUsername("new_farmer")).isPresent();
+        assertThat(userRepository.findByUsername("new_farmer").get().getRole()).isEqualTo(Role.FARMER);
+
+        Map<String, String> loginRequest = Map.of(
+                "username", "new_farmer",
+                "password", "secret123",
+                "expectedRole", "FARMER"
+        );
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testFarmerCannotLoginToVetPortal() throws Exception {
+        Map<String, String> loginRequest = Map.of(
+                "username", "test_farmer",
+                "password", "password123",
+                "expectedRole", "VET"
+        );
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testDuplicateUsernameRegistration() throws Exception {
+        Map<String, String> registerRequest = Map.of(
+                "username", "test_farmer",
+                "password", "secret123",
+                "role", "FARMER"
+        );
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isConflict());
     }
 
     @Test

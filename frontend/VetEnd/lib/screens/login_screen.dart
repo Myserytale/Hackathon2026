@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'otp_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -78,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       );
                                     } else {
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("Date incorecte")),
+                                        SnackBar(content: Text(auth.errorMessage ?? "Date incorecte")),
                                       );
                                     }
                                   },
@@ -86,6 +87,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ? const CircularProgressIndicator(color: Colors.white)
                                 : const Text("Autentificare"),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                            );
+                          },
+                          child: const Text('Nu ai cont? Înregistrează-te'),
                         ),
                       ],
                     ),

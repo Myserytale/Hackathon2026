@@ -1,10 +1,12 @@
 package com.digitalromania.farm.controllers;
 
 import com.digitalromania.farm.config.JwtUtil;
+import com.digitalromania.farm.models.Role;
 import com.digitalromania.farm.models.User;
 import com.digitalromania.farm.repositories.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +46,47 @@ public class AuthController {
         this.bucket = Bucket.builder().addLimit(limit).build();
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username is required");
+        }
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            return ResponseEntity.badRequest().body("Password must be at least 6 characters");
+        }
+        if (request.getRole() == null || request.getRole().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Role is required");
+        }
+
+        Role role;
+        try {
+            role = Role.valueOf(request.getRole().trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid role. Allowed: FARMER, VET, ADMIN");
+        }
+
+        if (role == Role.SYSTEM) {
+            return ResponseEntity.badRequest().body("Cannot register as SYSTEM user");
+        }
+
+        String username = request.getUsername().trim();
+        if (userRepository.findByUsername(username).isPresent()) {
+            return ResponseEntity.status(409).body("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(role);
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(409).body("Username already exists");
+        }
+
+        return ResponseEntity.status(201).body(new AuthResponse(null, "Registration successful"));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         if (!bucket.tryConsume(1)) {
@@ -53,16 +96,28 @@ public class AuthController {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
         
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
+            User user = userOpt.get();
+
+            if (request.getExpectedRole() != null && !request.getExpectedRole().isBlank()) {
+                try {
+                    Role expectedRole = Role.valueOf(request.getExpectedRole().trim().toUpperCase());
+                    if (user.getRole() != expectedRole) {
+                        return ResponseEntity.status(403).body("This account is not authorized for this portal");
+                    }
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.badRequest().body("Invalid expected role");
+                }
+            }
             // ROeID Step 1: Return a temporary 2FA token
-            String tempToken = jwtUtil.generate2FaToken(userOpt.get().getUsername());
+            String tempToken = jwtUtil.generate2FaToken(user.getUsername());
             
             // Mocking SMS/Email delivery via console
             String code = String.format("%06d", new Random().nextInt(999999));
-            otpStorage.put(userOpt.get().getUsername(), code);
+            otpStorage.put(user.getUsername(), code);
             LAST_GENERATED_OTP = code;
             
             System.out.println("\n====== MOCK ROeID NOTIFICATION ======");
-            System.out.println("To: " + userOpt.get().getUsername() + " (via Mailtrap/SMS)");
+            System.out.println("To: " + user.getUsername() + " (via Mailtrap/SMS)");
             System.out.println("Your ROeID authentication code is: " + code);
             System.out.println("=====================================\n");
             
@@ -100,6 +155,14 @@ public class AuthController {
 class AuthRequest {
     private String username;
     private String password;
+    private String expectedRole;
+}
+
+@Data
+class RegisterRequest {
+    private String username;
+    private String password;
+    private String role;
 }
 
 @Data

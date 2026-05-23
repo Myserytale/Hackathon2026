@@ -45,7 +45,11 @@ class _RegisterViewState extends State<RegisterView> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(authService.errorMessage ?? 'Registration failed'),
+              content: Text(
+                authService.errorMessage?.trim().isNotEmpty == true
+                    ? authService.errorMessage!
+                    : 'Registration failed. Rebuild Docker with: docker-compose up -d --build',
+              ),
               backgroundColor: Colors.red,
             ),
           );

@@ -9,6 +9,30 @@ class DashboardShell extends StatelessWidget {
 
   const DashboardShell({super.key, required this.child});
 
+  static Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Deconectare'),
+        content: const Text('Sigur doriți să vă deconectați din portalul APIA?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Anulează'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Deconectare'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<AuthProvider>().logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 1024;
@@ -81,16 +105,10 @@ class Sidebar extends StatelessWidget {
           ),
           const Spacer(),
           _NavItem(
-            icon: Icons.settings,
-            label: 'Setări Sistem',
-            isSelected: false,
-            onTap: () {},
-          ),
-          _NavItem(
             icon: Icons.logout,
             label: 'Deconectare',
             isSelected: false,
-            onTap: () => context.read<AuthProvider>().logout(),
+            onTap: () => DashboardShell._confirmLogout(context),
           ),
           const SizedBox(height: 20),
         ],
