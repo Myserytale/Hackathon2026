@@ -30,9 +30,9 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Semantics(
+        title: Semantics(
           header: true,
-          child: Text('APIA Funding Application'),
+          child: const Text('APIA Funding Application'),
         ),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
