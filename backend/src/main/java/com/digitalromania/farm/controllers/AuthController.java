@@ -10,6 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,6 +27,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    private Map<String, String> otpStorage = new ConcurrentHashMap<>();
+    public static String LAST_GENERATED_OTP = "123456"; // For testing
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
@@ -31,7 +37,18 @@ public class AuthController {
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
             // ROeID Step 1: Return a temporary 2FA token
             String tempToken = jwtUtil.generate2FaToken(userOpt.get().getUsername());
-            return ResponseEntity.ok(new AuthResponse(tempToken, "2FA required. Call /api/auth/verify-2fa"));
+            
+            // Mocking SMS/Email delivery via console
+            String code = String.format("%06d", new Random().nextInt(999999));
+            otpStorage.put(userOpt.get().getUsername(), code);
+            LAST_GENERATED_OTP = code;
+            
+            System.out.println("\n====== MOCK ROeID NOTIFICATION ======");
+            System.out.println("To: " + userOpt.get().getUsername() + " (via Mailtrap/SMS)");
+            System.out.println("Your ROeID authentication code is: " + code);
+            System.out.println("=====================================\n");
+            
+            return ResponseEntity.ok(new AuthResponse(tempToken, "2FA code sent via SMS/Email. Call /api/auth/verify-2fa"));
         }
         return ResponseEntity.status(401).body("Invalid credentials");
     }
@@ -43,8 +60,9 @@ public class AuthController {
         try {
             String username = jwtUtil.extractUsername(token);
             if (jwtUtil.validateToken(token, username) && jwtUtil.is2FaToken(token)) {
-                // Hackathon Mock: Accept '123456' as valid 2FA code
-                if ("123456".equals(request.getCode())) {
+                String expectedCode = otpStorage.get(username);
+                if (expectedCode != null && expectedCode.equals(request.getCode())) {
+                    otpStorage.remove(username); // One-time use
                     User user = userRepository.findByUsername(username).orElseThrow();
                     String finalToken = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
                     return ResponseEntity.ok(new AuthResponse(finalToken, "Login successful"));

@@ -1,0 +1,59 @@
+name: Hackathon Backend CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: farmuser
+          POSTGRES_PASSWORD: farmpassword
+          POSTGRES_DB: farmdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x backend/gradlew
+
+    - name: Build and Test with Gradle
+      working-directory: ./backend
+      env:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/farmdb
+        SPRING_DATASOURCE_USERNAME: farmuser
+        SPRING_DATASOURCE_PASSWORD: farmpassword
+        SPRING_REDIS_HOST: localhost
+      run: ./gradlew build --no-daemon
+
+    - name: Build Docker Image
+      run: docker compose build
+
+    - name: Push to Container Registry (Mock)
+      run: echo "In a real scenario, this would push to DockerHub/GHCR for Render/Railway to pull."

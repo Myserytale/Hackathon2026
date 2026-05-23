@@ -24,11 +24,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
 public class IntegrationTests {
 
@@ -36,6 +39,14 @@ public class IntegrationTests {
     private WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class CacheConfig {
+        @org.springframework.context.annotation.Bean
+        public CacheManager cacheManager() {
+            return new org.springframework.cache.support.NoOpCacheManager();
+        }
+    }
 
     @Autowired
     private UserRepository userRepository;
@@ -81,7 +92,7 @@ public class IntegrationTests {
         assertThat(tempToken).isNotNull();
         
         // Step 2: Verify 2FA
-        Map<String, String> verifyRequest = Map.of("tempToken", tempToken, "code", "123456");
+        Map<String, String> verifyRequest = Map.of("tempToken", tempToken, "code", com.digitalromania.farm.controllers.AuthController.LAST_GENERATED_OTP);
         
         MvcResult verifyResult = mockMvc.perform(post("/api/auth/verify-2fa")
                 .contentType(MediaType.APPLICATION_JSON)
