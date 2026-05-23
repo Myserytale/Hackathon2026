@@ -14,6 +14,7 @@ class ReportBirthView extends StatefulWidget {
 class _ReportBirthViewState extends State<ReportBirthView> {
   final _formKey = GlobalKey<FormState>();
   final _tagNumberController = TextEditingController();
+  final _nameController = TextEditingController();
   final _breedController = TextEditingController();
   String? _selectedSpecies;
   DateTime _selectedBirthDate = DateTime.now();
@@ -33,6 +34,7 @@ class _ReportBirthViewState extends State<ReportBirthView> {
   @override
   void dispose() {
     _tagNumberController.dispose();
+    _nameController.dispose();
     _breedController.dispose();
     super.dispose();
   }
@@ -42,6 +44,8 @@ class _ReportBirthViewState extends State<ReportBirthView> {
       final newAnimal = Animal(
         tagNumber: _tagNumberController.text,
         species: _selectedSpecies!,
+        name: _nameController.text.isNotEmpty ? _nameController.text : null,
+        type: _selectedSpecies!.toUpperCase(),
         breed: _breedController.text.isNotEmpty ? _breedController.text : null,
         birthDate: _selectedBirthDate,
         healthStatus: 'Healthy',
@@ -82,6 +86,15 @@ class _ReportBirthViewState extends State<ReportBirthView> {
                   prefixIcon: Icon(Icons.badge),
                 ),
                 validator: (value) => value == null || value.isEmpty ? 'Please enter a tag number' : null,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Animal Name (Optional)',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.pets),
+                ),
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(

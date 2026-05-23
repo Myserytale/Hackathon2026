@@ -23,14 +23,14 @@ class DatabaseHelper {
     }
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
+    if (oldVersion < 3) {
       await db.execute('DROP TABLE IF EXISTS animals');
       await _onCreate(db, newVersion);
     }
@@ -42,6 +42,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tagNumber TEXT UNIQUE,
         species TEXT,
+        name TEXT,
+        type TEXT,
         breed TEXT,
         birthDate TEXT,
         healthStatus TEXT,
@@ -49,22 +51,62 @@ class DatabaseHelper {
       )
     ''');
     
-    // Seed with initial data if needed
-    await db.insert('animals', {
-      'tagNumber': 'RO-10001',
-      'species': 'Cow',
-      'breed': 'Holstein',
-      'birthDate': '2021-05-23T00:00:00.000',
-      'healthStatus': 'Healthy',
-      'ownerId': 1,
-    });
-    await db.insert('animals', {
-      'tagNumber': 'RO-10002',
-      'species': 'Pig',
-      'breed': 'Landrace',
-      'birthDate': '2025-05-23T00:00:00.000',
-      'healthStatus': 'Healthy',
-      'ownerId': 1,
-    });
+    // Seed with demo data matching the backend DataSeeder
+    final demoAnimals = [
+      {
+        'tagNumber': 'RO-10001',
+        'species': 'Cow',
+        'name': 'Bessie',
+        'type': 'COW',
+        'breed': 'Holstein',
+        'birthDate': '2021-05-23T00:00:00.000',
+        'healthStatus': 'Healthy',
+        'ownerId': 1,
+      },
+      {
+        'tagNumber': 'RO-10002',
+        'species': 'Cow',
+        'name': 'Milka',
+        'type': 'COW',
+        'breed': 'Angus',
+        'birthDate': '2023-03-15T00:00:00.000',
+        'healthStatus': 'Healthy',
+        'ownerId': 1,
+      },
+      {
+        'tagNumber': 'RO-10003',
+        'species': 'Pig',
+        'name': 'Porky',
+        'type': 'PIG',
+        'breed': 'Mangalica',
+        'birthDate': '2024-11-01T00:00:00.000',
+        'healthStatus': 'Healthy',
+        'ownerId': 1,
+      },
+      {
+        'tagNumber': 'RO-10004',
+        'species': 'Sheep',
+        'name': 'Fluffy',
+        'type': 'SHEEP',
+        'breed': 'Merinos',
+        'birthDate': '2022-08-10T00:00:00.000',
+        'healthStatus': 'Healthy',
+        'ownerId': 1,
+      },
+      {
+        'tagNumber': 'RO-10005',
+        'species': 'Chicken',
+        'name': 'Clucky',
+        'type': 'CHICKEN',
+        'breed': 'Rhode Island Red',
+        'birthDate': '2025-01-20T00:00:00.000',
+        'healthStatus': 'Healthy',
+        'ownerId': 1,
+      },
+    ];
+    
+    for (final animal in demoAnimals) {
+      await db.insert('animals', animal);
+    }
   }
 }

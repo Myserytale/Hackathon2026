@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/animal_viewmodel.dart';
 import 'animal_detail_view.dart';
 import '../models/animal.dart';
+import 'report_birth_view.dart';
 
 class AnimalListView extends StatelessWidget {
   final String species;
@@ -52,6 +53,16 @@ class AnimalListView extends StatelessWidget {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReportBirthView()),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Add Animal'),
       ),
     );
   }

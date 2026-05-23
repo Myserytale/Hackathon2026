@@ -15,8 +15,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import java.util.List;
 import java.util.Map;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Tag(name = "Animals", description = "Animal Management API")
 @RequestMapping("/api/animals")
 public class AnimalController {
 
@@ -27,6 +31,8 @@ public class AnimalController {
     private UserRepository userRepository;
 
     @GetMapping
+    @Operation(summary = "Get all animals", description = "Fetches all animals accessible to the current user (Farmers see their own, Admin/Vet see all).")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved list")
     @PreAuthorize("hasAnyRole('FARMER', 'VET', 'ADMIN', 'SYSTEM')")
     @Cacheable(value = "animals", key = "#authentication.name")
     public List<Animal> getAllAnimals(Authentication authentication) {
@@ -40,6 +46,8 @@ public class AnimalController {
     }
 
     @GetMapping("/registry/check/{tagNumber}")
+    @Operation(summary = "Check TRACES EU Registry", description = "Queries the European Union TRACES system for validation.")
+    @ApiResponse(responseCode = "200", description = "Validation result returned")
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     public ResponseEntity<?> checkEuropeanRegistry(@PathVariable String tagNumber) {
         // Mock external API call to European Union TRACES system
@@ -54,9 +62,18 @@ public class AnimalController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create an animal", description = "Registers a new animal in the system.")
+    @ApiResponse(responseCode = "200", description = "Animal created")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FARMER')")
     @CacheEvict(value = "animals", allEntries = true)
-    public Animal createAnimal(@RequestBody Animal animal) {
+    public Animal createAnimal(@RequestBody Animal animal, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        
+        // Farmers can only create animals for themselves
+        if (user.getRole() == Role.FARMER) {
+            animal.setOwnerId(user.getId());
+        }
         return animalRepository.save(animal);
     }
 
@@ -68,6 +85,7 @@ public class AnimalController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update animal details", description = "Updates attributes of an existing animal.")
     @PreAuthorize("hasAnyRole('FARMER', 'VET', 'ADMIN')")
     @CacheEvict(value = "animals", allEntries = true)
     public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @RequestBody Animal animalDetails, Authentication authentication) {
@@ -93,6 +111,7 @@ public class AnimalController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete an animal", description = "Removes an animal from the registry.")
     @CacheEvict(value = "animals", allEntries = true)
     public ResponseEntity<?> deleteAnimal(@PathVariable Long id) {
         return animalRepository.findById(id)

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/animal_viewmodel.dart';
 import 'animal_list_view.dart';
 import 'animal_detail_view.dart';
+import 'report_birth_view.dart';
 
 class AnimalBrowsingView extends StatefulWidget {
   const AnimalBrowsingView({super.key});
@@ -38,6 +39,16 @@ class _AnimalBrowsingViewState extends State<AnimalBrowsingView> {
           return Scaffold(
             appBar: AppBar(title: const Text('My Animals')),
             body: const Center(child: Text('No animals found.')),
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ReportBirthView()),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Add Animal'),
+            ),
           );
         }
 
@@ -111,6 +122,16 @@ class _AnimalBrowsingViewState extends State<AnimalBrowsingView> {
                 ),
               );
             },
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ReportBirthView()),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Add Animal'),
           ),
         );
       },

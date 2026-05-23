@@ -2,6 +2,8 @@ class Animal {
   final int? id;
   final String tagNumber;
   final String species;
+  final String? name;
+  final String? type;
   final String? breed;
   final DateTime? birthDate;
   final String healthStatus;
@@ -11,6 +13,8 @@ class Animal {
     this.id,
     required this.tagNumber,
     required this.species,
+    this.name,
+    this.type,
     this.breed,
     this.birthDate,
     required this.healthStatus,
@@ -32,6 +36,8 @@ class Animal {
       'id': id,
       'tagNumber': tagNumber,
       'species': species,
+      'name': name,
+      'type': type,
       'breed': breed,
       'birthDate': birthDate?.toIso8601String(),
       'healthStatus': healthStatus,
@@ -44,6 +50,8 @@ class Animal {
       id: map['id'] is String ? int.tryParse(map['id']) : map['id'],
       tagNumber: map['tagNumber'] ?? '',
       species: map['species'] ?? '',
+      name: map['name'],
+      type: map['type'],
       breed: map['breed'],
       birthDate: map['birthDate'] != null ? DateTime.tryParse(map['birthDate']) : null,
       healthStatus: map['healthStatus'] ?? 'Healthy',
