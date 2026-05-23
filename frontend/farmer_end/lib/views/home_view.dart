@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import 'animal_browsing_view.dart';
 import 'report_birth_view.dart';
 import 'report_death_browsing_view.dart';
@@ -13,6 +15,15 @@ class HomeView extends StatelessWidget {
         title: const Text('Farm Management'),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Logout',
+            onPressed: () {
+              Provider.of<AuthService>(context, listen: false).logout();
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
