@@ -5,6 +5,8 @@ import com.digitalromania.farm.repositories.FundingApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.digitalromania.farm.models.Animal;
+import com.digitalromania.farm.repositories.AnimalRepository;
 
 import java.util.List;
 
@@ -25,9 +27,23 @@ public class FundingApplicationController {
         return fundingRepository.findByFarmerId(farmerId);
     }
 
+    @Autowired
+    private AnimalRepository animalRepository;
+
     @PostMapping
-    public FundingApplication createApplication(@RequestBody FundingApplication application) {
-        return fundingRepository.save(application);
+    public ResponseEntity<?> createApplication(@RequestBody FundingApplication application) {
+        // Business Logic: Reject if any animal is SICK
+        List<Animal> farmerAnimals = animalRepository.findByOwnerId(application.getFarmerId());
+        boolean hasSickAnimals = farmerAnimals.stream()
+                .anyMatch(a -> "SICK".equalsIgnoreCase(a.getHealthStatus()) || "TREATMENT_PENDING".equalsIgnoreCase(a.getHealthStatus()));
+                
+        if (hasSickAnimals) {
+            application.setStatus("REJECTED_AUTOMATICALLY");
+        } else {
+            application.setStatus("PENDING");
+        }
+        
+        return ResponseEntity.ok(fundingRepository.save(application));
     }
 
     @GetMapping("/{id}")
