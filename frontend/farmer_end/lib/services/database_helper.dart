@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -16,7 +17,10 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'farm_management.db');
+    String path = 'farm_management.db';
+    if (!kIsWeb) {
+      path = join(await getDatabasesPath(), path);
+    }
     return await openDatabase(
       path,
       version: 2,
