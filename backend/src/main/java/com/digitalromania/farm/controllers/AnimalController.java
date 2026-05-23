@@ -27,7 +27,7 @@ public class AnimalController {
     private UserRepository userRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT', 'SYSTEM')")
+    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'ADMIN', 'SYSTEM')")
     @Cacheable(value = "animals", key = "#authentication.name")
     public List<Animal> getAllAnimals(Authentication authentication) {
         String username = authentication.getName();
@@ -40,7 +40,7 @@ public class AnimalController {
     }
 
     @GetMapping("/registry/check/{tagNumber}")
-    @PreAuthorize("hasAnyRole('SYSTEM', 'CIVIL_SERVANT')")
+    @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     public ResponseEntity<?> checkEuropeanRegistry(@PathVariable String tagNumber) {
         // Mock external API call to European Union TRACES system
         boolean isRegisteredInEU = tagNumber.startsWith("RO") || tagNumber.startsWith("EU");
@@ -54,7 +54,7 @@ public class AnimalController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('CIVIL_SERVANT')")
+    @PreAuthorize("hasRole('ADMIN')")
     @CacheEvict(value = "animals", allEntries = true)
     public Animal createAnimal(@RequestBody Animal animal) {
         return animalRepository.save(animal);
@@ -68,7 +68,7 @@ public class AnimalController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT')")
+    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'ADMIN')")
     @CacheEvict(value = "animals", allEntries = true)
     public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @RequestBody Animal animalDetails, Authentication authentication) {
         String username = authentication.getName();

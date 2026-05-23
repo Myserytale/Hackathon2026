@@ -37,7 +37,7 @@ public class DataSeeder implements CommandLineRunner {
             User admin = new User();
             admin.setUsername("admin_maria");
             admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole(Role.CIVIL_SERVANT);
+            admin.setRole(Role.ADMIN);
             userRepository.save(admin);
             
             System.out.println("Mock users seeded successfully!");

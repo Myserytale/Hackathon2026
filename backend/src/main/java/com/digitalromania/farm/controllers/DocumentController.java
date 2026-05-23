@@ -30,7 +30,7 @@ public class DocumentController {
     }
 
     @PostMapping(consumes = {"multipart/form-data"})
-    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'CIVIL_SERVANT')")
+    @PreAuthorize("hasAnyRole('FARMER', 'VET', 'ADMIN')")
     public ResponseEntity<Document> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @RequestParam("animalId") Long animalId,

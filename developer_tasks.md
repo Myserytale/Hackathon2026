@@ -18,10 +18,10 @@ This document breaks down the remaining work into distinct, assignable tracks fo
 ---
 
 ## 👨‍💻 Developer 2: Frontend - Vet & Admin Dashboards
-**Focus:** Building dedicated views for the `VET` and `CIVIL_SERVANT`, and showcasing the ledger to the judges.
+**Focus:** Building dedicated views for the `VET` and `ADMIN`, and showcasing the ledger to the judges.
 *   > 💡 **Backend Integration Note:** The backend now features an extremely fast Redis cache for animal queries, so dashboard loads will be lightning fast. You can also hook into the new `/api/animals/registry/check/{tagNumber}` endpoint to show real-time European TRACES registry validation on the Admin dashboard!
 *   `[ ]` **Veterinary Dashboard:** Create a view for the `VET` role to log `VeterinaryConsultation`s, issue health certificates, and flag potential biological incidents (disease outbreaks).
-*   `[ ]` **Civil Servant Dashboard:** Build UI tables allowing admins (`CIVIL_SERVANT`) to review, approve, or reject pending `FundingApplication` requests.
+*   `[ ]` **Admin Dashboard:** Build UI tables allowing admins (`ADMIN`) to review, approve, or reject pending `FundingApplication` requests.
 *   `[ ]` **EU Registry Check Integration (Phase 2):** Add a button/indicator in the Admin Dashboard to ping the new `/api/animals/registry/check/{tagNumber}` endpoint and display the TRACES validation status.
 *   `[ ]` **Ledger / Audit Log Viewer:** Build a specialized "Transparency" page that queries the `AuditLog` endpoint. This must visually highlight the cryptographic hashes to prove data immutability to the judges.
 *   `[ ]` **Data Visualization:** Implement simple charts (e.g., using Chart.js or Recharts) showing statistics like "Incidents by Region", "Vaccination Rates", or "Funding Distribution."
@@ -30,14 +30,17 @@ This document breaks down the remaining work into distinct, assignable tracks fo
 
 ## 🧑‍💻 Developer 3: Backend Core - Data & Business Logic
 **Focus:** Fleshing out the Spring Boot backend, ensuring security tightens, and making the demo look real.
-*   `[ ]` **Rate Limiting:** Implement a basic rate limiter (e.g., Bucket4j) on the `/api/auth/login` endpoint to prevent brute-force attacks and demonstrate enterprise-level security.
-*   `[ ]` **Swagger/OpenAPI Polish:** Add detailed `@Operation`, `@ApiResponse`, and parameter descriptions to all Controllers so the judges see perfectly generated API documentation.
-*   `[ ]` **Data Export:** Create an endpoint to export the `AuditLog` as a downloadable CSV or PDF file for official civil servant reporting.
+*   `[ ]` **Dashboard Aggregation API:** Create a `/api/stats/dashboard` endpoint that returns aggregated data (e.g., total animals per health status, recent incidents) so Developer 2 can easily build their charts.
+*   `[ ]` **Incident Notification System:** Implement an endpoint using Server-Sent Events (SSE) or long-polling so the frontend can display real-time popup alerts when a new biological incident is logged by a Vet.
+*   `[ ]` **Funding Rules Engine:** Add automated business logic to `FundingApplicationController`. For example, automatically flag or reject a funding application if the farmer has an active disease incident in their herd.
+*   `[ ]` **Rate Limiting (Security):** Implement a basic rate limiter (e.g., Bucket4j) on the `/api/auth/login` endpoint to prevent brute-force attacks and demonstrate enterprise-level security to the judges.
+*   `[ ]` **Swagger/OpenAPI Polish:** Add detailed `@Operation`, `@ApiResponse`, and parameter descriptions to all Controllers so the API documentation looks perfectly enterprise-ready.
+*   `[x]` **Data Export:** Create an endpoint to export the `AuditLog` as a downloadable CSV or PDF file for official civil servant reporting.
 
 ---
 
 ## 👨‍🔧 Developer 4: DevOps, Integrations & Polish
 **Focus:** Deployment, infrastructure, and making the architecture look enterprise-ready.
-*   `[ ]` **Monitoring & Observability:** Add Spring Boot Actuator and hook it up to a Prometheus/Grafana container in `docker-compose.yml` to show real-time metrics during the pitch.
-*   `[ ]` **Automated Database Backups:** Write a simple cron script in the Docker setup that dumps the PostgreSQL database to a local file every 5 minutes to prove disaster recovery capabilities.
-*   `[ ]` **TLS/SSL Mocking:** Configure the backend or an Nginx reverse proxy to serve the API over HTTPS (using self-signed certificates) so the app strictly uses secure connections.
+*   `[x]` **Monitoring & Observability:** Add Spring Boot Actuator and hook it up to a Prometheus/Grafana container in `docker-compose.yml` to show real-time metrics during the pitch.
+*   `[x]` **Automated Database Backups:** Write a simple cron script in the Docker setup that dumps the PostgreSQL database to a local file every 5 minutes to prove disaster recovery capabilities.
+*   `[x]` **TLS/SSL Mocking:** Configure the backend or an Nginx reverse proxy to serve the API over HTTPS (using self-signed certificates) so the app strictly uses secure connections.
