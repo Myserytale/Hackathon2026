@@ -23,7 +23,7 @@ class AnimalService {
     );
   }
 
-  Future<void> removeAnimal(String id) async {
+  Future<void> removeAnimal(int id) async {
     final db = await _dbHelper.database;
     await db.delete(
       'animals',

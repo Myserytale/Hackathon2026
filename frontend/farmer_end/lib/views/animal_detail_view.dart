@@ -8,9 +8,13 @@ class AnimalDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final birthDateStr = animal.birthDate != null
+        ? '${animal.birthDate!.year}-${animal.birthDate!.month.toString().padLeft(2, '0')}-${animal.birthDate!.day.toString().padLeft(2, '0')}'
+        : 'Unknown';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(animal.name),
+        title: Text('Tag: ${animal.tagNumber}'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: SingleChildScrollView(
@@ -26,9 +30,11 @@ class AnimalDetailView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _infoRow(Icons.pets, 'Species', animal.species),
+            _infoRow(Icons.category, 'Breed', animal.breed ?? 'Unknown'),
             _infoRow(Icons.cake, 'Age', '${animal.age} years'),
-            _infoRow(Icons.monitor_weight, 'Weight', '${animal.weight} kg'),
+            _infoRow(Icons.calendar_today, 'Birth Date', birthDateStr),
             _infoRow(Icons.health_and_safety, 'Health Status', animal.healthStatus),
+            _infoRow(Icons.person, 'Owner ID', animal.ownerId?.toString() ?? 'Unknown'),
           ],
         ),
       ),

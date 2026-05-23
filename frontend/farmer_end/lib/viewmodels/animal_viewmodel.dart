@@ -41,7 +41,7 @@ class AnimalViewModel extends ChangeNotifier {
     await loadAnimals(); // Refresh list
   }
 
-  Future<void> removeAnimal(String id) async {
+  Future<void> removeAnimal(int id) async {
     await _animalService.removeAnimal(id);
     await loadAnimals(); // Refresh list
   }

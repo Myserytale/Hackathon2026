@@ -35,8 +35,8 @@ class AnimalListView extends StatelessWidget {
               leading: CircleAvatar(
                 child: Text(animal.species[0]),
               ),
-              title: Text(animal.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text('Age: ${animal.age} | Weight: ${animal.weight}kg'),
+              title: Text('Tag: ${animal.tagNumber}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('Breed: ${animal.breed ?? 'Unknown'} | Age: ${animal.age} yrs'),
               trailing: Chip(
                 label: Text(animal.healthStatus),
                 backgroundColor: animal.healthStatus == 'Healthy' ? Colors.green[100] : Colors.orange[100],

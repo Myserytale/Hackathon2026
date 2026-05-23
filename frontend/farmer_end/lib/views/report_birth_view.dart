@@ -13,9 +13,10 @@ class ReportBirthView extends StatefulWidget {
 
 class _ReportBirthViewState extends State<ReportBirthView> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _weightController = TextEditingController();
+  final _tagNumberController = TextEditingController();
+  final _breedController = TextEditingController();
   String? _selectedSpecies;
+  DateTime _selectedBirthDate = DateTime.now();
 
   final List<String> _animalTypes = [
     'Cow',
@@ -31,26 +32,26 @@ class _ReportBirthViewState extends State<ReportBirthView> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _weightController.dispose();
+    _tagNumberController.dispose();
+    _breedController.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (_formKey.currentState!.validate() && _selectedSpecies != null) {
       final newAnimal = Animal(
-        id: Random().nextInt(10000).toString(),
-        name: _nameController.text,
+        tagNumber: _tagNumberController.text,
         species: _selectedSpecies!,
-        age: 0,
-        weight: double.parse(_weightController.text),
+        breed: _breedController.text.isNotEmpty ? _breedController.text : null,
+        birthDate: _selectedBirthDate,
         healthStatus: 'Healthy',
+        ownerId: 1,
       );
 
       context.read<AnimalViewModel>().addAnimal(newAnimal);
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reported birth of ${newAnimal.name}')),
+        SnackBar(content: Text('Reported birth of animal with Tag: ${newAnimal.tagNumber}')),
       );
       
       Navigator.pop(context);
@@ -59,6 +60,8 @@ class _ReportBirthViewState extends State<ReportBirthView> {
 
   @override
   Widget build(BuildContext context) {
+    final birthDateStr = '${_selectedBirthDate.year}-${_selectedBirthDate.month.toString().padLeft(2, '0')}-${_selectedBirthDate.day.toString().padLeft(2, '0')}';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Report New Birth'),
@@ -72,13 +75,13 @@ class _ReportBirthViewState extends State<ReportBirthView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
-                controller: _nameController,
+                controller: _tagNumberController,
                 decoration: const InputDecoration(
-                  labelText: 'Animal Name',
+                  labelText: 'Tag Number',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.badge),
                 ),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
+                validator: (value) => value == null || value.isEmpty ? 'Please enter a tag number' : null,
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
@@ -103,18 +106,36 @@ class _ReportBirthViewState extends State<ReportBirthView> {
               ),
               const SizedBox(height: 20),
               TextFormField(
-                controller: _weightController,
+                controller: _breedController,
                 decoration: const InputDecoration(
-                  labelText: 'Weight at Birth (kg)',
+                  labelText: 'Breed (Optional)',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.monitor_weight),
+                  prefixIcon: Icon(Icons.category),
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter weight';
-                  if (double.tryParse(value) == null) return 'Please enter a valid number';
-                  return null;
+              ),
+              const SizedBox(height: 20),
+              InkWell(
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedBirthDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedBirthDate = pickedDate;
+                    });
+                  }
                 },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Birth Date',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.calendar_today),
+                  ),
+                  child: Text(birthDateStr, style: const TextStyle(fontSize: 16)),
+                ),
               ),
               const SizedBox(height: 40),
               ElevatedButton(

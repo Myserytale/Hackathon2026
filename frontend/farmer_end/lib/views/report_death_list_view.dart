@@ -32,8 +32,8 @@ class ReportDeathListView extends StatelessWidget {
             elevation: 1,
             child: ListTile(
               leading: CircleAvatar(child: Text(animal.species[0])),
-              title: Text(animal.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text('Age: ${animal.age} | Weight: ${animal.weight}kg'),
+              title: Text('Tag: ${animal.tagNumber}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('Breed: ${animal.breed ?? 'Unknown'} | Age: ${animal.age} yrs'),
               trailing: const Icon(Icons.remove_circle_outline, color: Colors.red),
               onTap: () => _confirmDeath(context, animal),
             ),
@@ -49,7 +49,7 @@ class ReportDeathListView extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Death Report'),
-        content: Text('Are you sure you want to report the death of ${animal.name}? This will remove them from your inventory permanently.'),
+        content: Text('Are you sure you want to report the death of animal with Tag: ${animal.tagNumber}? This will remove them from your inventory permanently.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -57,7 +57,7 @@ class ReportDeathListView extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              viewModel.removeAnimal(animal.id);
+              viewModel.removeAnimal(animal.id!);
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Return to previous screen (browsing/categories)
               
@@ -68,7 +68,7 @@ class ReportDeathListView extends StatelessWidget {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Removed ${animal.name} from inventory'),
+                  content: Text('Removed animal with Tag: ${animal.tagNumber} from inventory'),
                   backgroundColor: Colors.red,
                 ),
               );
