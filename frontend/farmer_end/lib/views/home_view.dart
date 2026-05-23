@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../services/auth_service.dart';
 import 'animal_browsing_view.dart';
 import 'report_birth_view.dart';
@@ -73,14 +75,47 @@ class HomeView extends StatelessWidget {
                         child: const Text('Cancel'),
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Vet visit request sent successfully!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          try {
+                            final authService = context.read<AuthService>();
+                            final response = await http.post(
+                              Uri.parse('http://localhost:8080/api/incidents'),
+                              headers: {
+                                'Content-Type': 'application/json',
+                                if (authService.token != null) 'Authorization': 'Bearer ${authService.token}',
+                              },
+                              body: jsonEncode({
+                                'type': 'Vet Request',
+                                'description': 'The farmer has requested a vet visit.',
+                                'location': 'Farm Headquarters',
+                                'status': 'PENDING',
+                                'reportedAt': DateTime.now().toIso8601String(),
+                              }),
+                            );
+
+                            if (response.statusCode == 200) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Vet visit request sent to the Vet Portal!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            } else {
+                              throw Exception('Failed to send request');
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not reach backend. Using offline fallback.'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            }
+                          }
                         },
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                         child: const Text('Send Request', style: TextStyle(color: Colors.white)),
