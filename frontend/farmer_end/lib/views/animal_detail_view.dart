@@ -15,7 +15,7 @@ class AnimalDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tag: ${animal.tagNumber}'),
+        title: Text(animal.name != null ? '${animal.name} (${animal.tagNumber})' : 'Tag: ${animal.tagNumber}'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: SingleChildScrollView(
@@ -30,6 +30,8 @@ class AnimalDetailView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            if (animal.name != null) _infoRow(Icons.badge, 'Name', animal.name!),
+            if (animal.type != null) _infoRow(Icons.category, 'Type', animal.type!),
             _infoRow(Icons.pets, 'Species', animal.species),
             _infoRow(Icons.category, 'Breed', animal.breed ?? 'Unknown'),
             _infoRow(Icons.cake, 'Age', '${animal.age} years'),

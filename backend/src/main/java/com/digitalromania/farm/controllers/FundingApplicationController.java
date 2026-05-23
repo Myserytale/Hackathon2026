@@ -10,7 +10,12 @@ import com.digitalromania.farm.repositories.AnimalRepository;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Funding", description = "Funding Application API")
 @RequestMapping("/api/funding")
 public class FundingApplicationController {
 
@@ -18,6 +23,7 @@ public class FundingApplicationController {
     private FundingApplicationRepository fundingRepository;
 
     @GetMapping
+    @Operation(summary = "Get all funding applications", description = "Retrieves a list of all funding applications.")
     public List<FundingApplication> getAllApplications() {
         return fundingRepository.findAll();
     }
@@ -31,6 +37,7 @@ public class FundingApplicationController {
     private AnimalRepository animalRepository;
 
     @PostMapping
+    @Operation(summary = "Create funding application", description = "Submits a new funding application. Automatically rejected if farmer has sick animals.")
     public ResponseEntity<?> createApplication(@RequestBody FundingApplication application) {
         // Business Logic: Reject if any animal is SICK
         List<Animal> farmerAnimals = animalRepository.findByOwnerId(application.getFarmerId());

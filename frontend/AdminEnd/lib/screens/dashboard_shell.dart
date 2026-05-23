@@ -103,6 +103,12 @@ class Sidebar extends StatelessWidget {
             isSelected: location == '/ledger',
             onTap: () => context.go('/ledger'),
           ),
+          _NavItem(
+            icon: Icons.bar_chart,
+            label: 'Data Analytics',
+            isSelected: location == '/analytics',
+            onTap: () => context.go('/analytics'),
+          ),
           const Spacer(),
           _NavItem(
             icon: Icons.logout,

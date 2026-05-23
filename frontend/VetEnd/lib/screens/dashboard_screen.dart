@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/action_card.dart';
 import 'ledger_screen.dart';
+import 'consultation_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     const PendingAlertsView(),
+    const ConsultationScreen(),
     const LedgerScreen(),
   ];
 
@@ -58,6 +60,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           NavigationDestination(
             icon: Icon(Icons.pending_actions, size: 32),
             label: "Alerte Pendinte",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.medical_services, size: 32),
+            label: "Consultații",
           ),
           NavigationDestination(
             icon: Icon(Icons.history_edu, size: 32),
