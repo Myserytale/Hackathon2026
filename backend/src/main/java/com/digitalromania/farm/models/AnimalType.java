@@ -7,5 +7,7 @@ public enum AnimalType {
     GOAT,
     CHICKEN,
     HORSE,
+    DUCK,
+    RABBIT,
     OTHER
 }

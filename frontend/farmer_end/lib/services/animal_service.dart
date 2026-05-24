@@ -58,9 +58,10 @@ class AnimalService {
           body: jsonEncode(animal.toMap()),
         ).timeout(const Duration(seconds: 5));
         
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 || response.statusCode == 201) {
           return; // Successfully added to backend
         }
+        debugPrint('Backend add animal failed: ${response.statusCode} ${response.body}');
       } catch (e) {
         debugPrint('Backend unavailable for add, saving locally: $e');
       }
@@ -86,9 +87,10 @@ class AnimalService {
           headers: _headers,
         ).timeout(const Duration(seconds: 5));
         
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 || response.statusCode == 204) {
           return;
         }
+        debugPrint('Backend delete animal failed: ${response.statusCode} ${response.body}');
       } catch (e) {
         debugPrint('Backend unavailable for delete, removing locally: $e');
       }

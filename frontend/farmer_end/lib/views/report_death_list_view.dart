@@ -45,33 +45,33 @@ class ReportDeathListView extends StatelessWidget {
 
   void _confirmDeath(BuildContext context, Animal animal) {
     final viewModel = context.read<AnimalViewModel>();
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Confirm Death Report'),
         content: Text('Are you sure you want to report the death of animal with Tag: ${animal.tagNumber}? This will remove them from your inventory permanently.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              viewModel.removeAnimal(animal.id!);
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Return to previous screen (browsing/categories)
+            onPressed: () async {
+              Navigator.pop(dialogContext); // Close dialog first
               
-              if (isStandalone) {
-                // If it was the only category, we are now back on dashboard or browsing.
-                // Browsing will auto-refresh.
-              }
-
-              ScaffoldMessenger.of(context).showSnackBar(
+              await viewModel.removeAnimal(animal.id!);
+              
+              scaffoldMessenger.showSnackBar(
                 SnackBar(
                   content: Text('Removed animal with Tag: ${animal.tagNumber} from inventory'),
                   backgroundColor: Colors.red,
                 ),
               );
+              
+              if (context.mounted) {
+                Navigator.pop(context); // Return to previous screen
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Confirm'),
