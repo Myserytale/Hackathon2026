@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/auth_service.dart';
+import '../config/api_config.dart';
 import 'funding_application_view.dart';
 
 class MyDossiersView extends StatefulWidget {
@@ -31,7 +32,7 @@ class _MyDossiersViewState extends State<MyDossiersView> {
     // In a real app, the ID comes from auth token
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/grant-dossiers/farmer/1'),
+        Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/farmer/1'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -54,7 +55,7 @@ class _MyDossiersViewState extends State<MyDossiersView> {
   }
 
   Future<void> _downloadPdf(int dossierId, String docType) async {
-    final url = Uri.parse('http://localhost:8080/api/grant-dossiers/$dossierId/download/$docType');
+    final url = Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/$dossierId/download/$docType');
     try {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {

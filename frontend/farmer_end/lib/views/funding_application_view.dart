@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
+import '../config/api_config.dart';
 
 class FundingApplicationView extends StatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -60,7 +61,7 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
     final token = authService.token;
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/users/vets'),
+        Uri.parse('${ApiConfig.apiBaseUrl}/users/vets'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -149,7 +150,7 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
       }
       
       final response = await http.post(
-        Uri.parse('http://localhost:8080/api/grant-dossiers/submit-farmer'),
+        Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/submit-farmer'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -216,7 +217,7 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
         }
 
         final response = await http.post(
-          Uri.parse('http://localhost:8080/api/grant-dossiers/submit-farmer'),
+          Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/submit-farmer'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -235,7 +236,7 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
           if (_uploadedFileName != null && _uploadedFilePath != null) {
             var request = http.MultipartRequest(
               'POST',
-              Uri.parse('http://localhost:8080/api/grant-dossiers/$dossierId/upload-signed'),
+              Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/$dossierId/upload-signed'),
             );
             request.headers['Authorization'] = 'Bearer $token';
             request.fields['docType'] = 'farmer';
@@ -289,7 +290,7 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
     await _generateDraft();
     
     if (_dossierId != null) {
-      final url = Uri.parse('http://localhost:8080/api/grant-dossiers/$_dossierId/download/farmer');
+      final url = Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/$_dossierId/download/farmer');
       try {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } catch (e) {

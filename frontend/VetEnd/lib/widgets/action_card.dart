@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/alert.dart';
 import '../theme/app_theme.dart';
 import 'validation_modal.dart';
+import '../config/api_config.dart';
 
 class ActionCard extends StatelessWidget {
   final Alert alert;
@@ -55,7 +56,7 @@ class ActionCard extends StatelessWidget {
             if (alert.farmerDocumentUrl != null)
               OutlinedButton.icon(
                 onPressed: () async {
-                  final url = Uri.parse('http://localhost:8080/api/grant-dossiers/${alert.dossierId}/download/farmer');
+                  final url = Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/${alert.dossierId}/download/farmer');
                   try {
                     // Use url_launcher or similar here if available, otherwise just print
                     // For demo, we just print or let the user click it.

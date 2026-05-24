@@ -5,9 +5,10 @@ import '../models/animal.dart';
 import 'database_helper.dart';
 import 'auth_service.dart';
 import 'package:sqflite/sqflite.dart';
+import '../config/api_config.dart';
 
 class AnimalService {
-  static const String baseUrl = 'http://localhost:8080/api/animals';
+  static String get baseUrl => '${ApiConfig.apiBaseUrl}/animals';
   final DatabaseHelper _dbHelper = DatabaseHelper();
   
   String? _authToken;
