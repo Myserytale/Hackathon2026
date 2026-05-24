@@ -123,10 +123,10 @@ class DataService extends ChangeNotifier {
   Alert _mapToAlert(Map<String, dynamic> json) {
     return Alert(
       id: json['id'].toString(),
-      farmerName: "Fermier ID: ${json['farmerId']}",
+      farmerName: json['farmerId'] != null ? "Fermier ID: ${json['farmerId']}" : "Fermier Necunoscut",
       animalType: json['type'] ?? 'Animal',
       description: json['description'] ?? 'Fără descriere',
-      timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : DateTime.now(),
+      timestamp: json['reportedAt'] != null ? DateTime.parse(json['reportedAt']) : DateTime.now(),
       status: _mapStatus(json['status']),
     );
   }
