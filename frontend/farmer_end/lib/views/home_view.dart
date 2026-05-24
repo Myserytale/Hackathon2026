@@ -107,7 +107,7 @@ class HomeView extends StatelessWidget {
     final token = authService.token;
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/users/vets'),
+        Uri.parse('${ApiConfig.apiBaseUrl}/users/vets'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
