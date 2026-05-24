@@ -1,5 +1,6 @@
 package com.digitalromania.farm.controllers;
 
+import org.springframework.security.core.Authentication;
 import com.digitalromania.farm.models.Animal;
 import com.digitalromania.farm.models.GrantDossier;
 import com.digitalromania.farm.models.GrantDossierStatus;
@@ -47,16 +48,28 @@ public class GrantDossierController {
 
     // 1. Fermier creates dossier (submits APIA form)
     @PostMapping("/submit-farmer")
-    public ResponseEntity<?> submitFarmerDossier(@RequestBody Map<String, Object> payload) {
-        Long farmerId = Long.valueOf(payload.get("farmerId").toString());
-        Long animalId = Long.valueOf(payload.get("animalId").toString());
-        String iban = payload.getOrDefault("iban", "RO00XXXX0000").toString();
-        
-        User farmer = userRepository.findById(farmerId).orElseThrow(() -> new RuntimeException("Farmer not found"));
-        Animal animal = animalRepository.findById(animalId).orElseThrow(() -> new RuntimeException("Animal not found"));
+    public ResponseEntity<?> submitFarmerDossier(@RequestBody Map<String, Object> payload, Authentication auth) {
+        try {
+            User farmer = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Farmer not found"));
+            
+            List<Animal> animals = animalRepository.findByOwnerId(farmer.getId());
+            Animal animal;
+            if (animals.isEmpty()) {
+                animal = new Animal();
+                animal.setTagNumber(payload.containsKey("animalTag") ? payload.get("animalTag").toString() : "RO000000");
+                animal.setOwnerId(farmer.getId());
+                animal.setSpecies("Bovine");
+                animal.setHealthStatus("ALIVE");
+                animal = animalRepository.save(animal);
+            } else {
+                animal = animals.get(0);
+            }
 
-        GrantDossier dossier;
-        boolean isDraft = payload.containsKey("isDraft") && (Boolean) payload.get("isDraft");
+            String iban = payload.getOrDefault("iban", "RO00XXXX0000").toString();
+
+            GrantDossier dossier;
+            boolean isDraft = payload.containsKey("isDraft") && (Boolean) payload.get("isDraft");
 
         if (payload.containsKey("dossierId") && payload.get("dossierId") != null) {
             Long existingId = Long.valueOf(payload.get("dossierId").toString());
@@ -96,6 +109,9 @@ public class GrantDossierController {
         grantDossierRepository.save(dossier);
 
         return ResponseEntity.ok(Map.of("message", isDraft ? "Draft created" : "Dossier sent to Veterinarian", "dossierId", dossier.getId(), "documentUrl", dossier.getFarmerDocumentUrl()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 
     @Autowired
