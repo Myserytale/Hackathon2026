@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.digitalromania.farm.services.EmailService;
 import com.digitalromania.farm.services.PdfGeneratorService;
 
 @RestController
@@ -97,6 +98,9 @@ public class GrantDossierController {
         return ResponseEntity.ok(Map.of("message", isDraft ? "Draft created" : "Dossier sent to Veterinarian", "dossierId", dossier.getId(), "documentUrl", dossier.getFarmerDocumentUrl()));
     }
 
+    @Autowired
+    private EmailService emailService;
+
     // 2. Vet updates dossier (adds F1 form)
     @PostMapping("/{dossierId}/vet-review")
     public ResponseEntity<?> vetReview(@PathVariable Long dossierId, @RequestBody Map<String, Object> payload) {
@@ -120,6 +124,14 @@ public class GrantDossierController {
         }
 
         grantDossierRepository.save(dossier);
+
+        // Send email notification to farmer
+        User farmer = dossier.getFarmer();
+        if (farmer != null && farmer.getEmail() != null) {
+            String docUrl = dossier.getVetDocumentUrl();
+            emailService.sendDossierStatusEmail(farmer.getEmail(), farmer.getName() != null ? farmer.getName() : farmer.getUsername(), dossier.getStatus().toString(), docUrl);
+        }
+
         return ResponseEntity.ok(Map.of("message", "Vet review recorded", "status", dossier.getStatus()));
     }
 
@@ -137,6 +149,13 @@ public class GrantDossierController {
         }
         
         grantDossierRepository.save(dossier);
+
+        // Send email notification to farmer
+        User farmer = dossier.getFarmer();
+        if (farmer != null && farmer.getEmail() != null) {
+            emailService.sendDossierStatusEmail(farmer.getEmail(), farmer.getName() != null ? farmer.getName() : farmer.getUsername(), dossier.getStatus().toString(), null);
+        }
+
         return ResponseEntity.ok(Map.of("message", "APIA review completed", "status", dossier.getStatus()));
     }
 

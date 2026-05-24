@@ -15,4 +15,9 @@ public class TestEmailService implements EmailService {
         lastRecipientEmail = toEmail;
         lastOtp = code;
     }
+
+    @Override
+    public void sendDossierStatusEmail(String toEmail, String recipientName, String status, String documentUrl) {
+        lastRecipientEmail = toEmail;
+    }
 }
