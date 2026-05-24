@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../services/auth_service.dart';
 import '../theme/roeid_theme.dart';
@@ -213,16 +212,9 @@ class HomeView extends StatelessWidget {
             ElevatedButton(
               onPressed: selectedVet == null
                   ? null
-                  : () {
+                  : () async {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Vet visit request sent to ${selectedVet!['username']}!',
-                          ),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
+                      await _sendVetRequest(context, selectedVet!);
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -236,7 +228,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Future<void> _sendVetRequest(BuildContext context) async {
+  Future<void> _sendVetRequest(BuildContext context, Map<String, dynamic> selectedVet) async {
     try {
       final authService = context.read<AuthService>();
       final response = await http.post(
@@ -247,9 +239,9 @@ class HomeView extends StatelessWidget {
         },
         body: jsonEncode({
           'type': 'Vet Request',
-          'description': 'The farmer has requested a vet visit.',
+          'description': 'The farmer has requested a vet visit to ${selectedVet['username']}.',
           'location': 'Farm Headquarters',
-          'status': 'PENDING',
+          'status': 'PENDING_VET',
           'reportedAt': DateTime.now().toIso8601String(),
         }),
       );
@@ -258,15 +250,16 @@ class HomeView extends StatelessWidget {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vet visit request sent to the Vet Portal!'),
+          SnackBar(
+            content: Text('Vet visit request sent to ${selectedVet['username']}!'),
             backgroundColor: RoeidTheme.success,
           ),
         );
       } else {
-        throw Exception('Failed to send request');
+        throw Exception('Failed to send request: ${response.statusCode}');
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Error sending vet request: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -316,15 +309,18 @@ class HomeView extends StatelessWidget {
   Future<void> _confirmLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Log out?'),
         content: const Text('Are you sure you want to disconnect from the farmer portal?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Log out')),
         ],
       ),
     );
+    if (confirmed == true && context.mounted) {
+      context.read<AuthService>().logout();
+    }
   }
 
   Widget _dashboardButton(

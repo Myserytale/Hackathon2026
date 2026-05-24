@@ -65,11 +65,13 @@ public class IncidentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping(value = "/{id}/status", consumes = {"application/json", "text/plain"})
     public ResponseEntity<Incident> updateStatus(@PathVariable Long id, @RequestBody String status) {
+        // Strip quotes in case it was sent as a JSON string like "\"RESOLVED\""
+        String cleanStatus = status.trim().replaceAll("\"", "");
         return incidentRepository.findById(id)
                 .map(incident -> {
-                    incident.setStatus(status);
+                    incident.setStatus(cleanStatus);
                     return ResponseEntity.ok(incidentRepository.save(incident));
                 })
                 .orElse(ResponseEntity.notFound().build());
