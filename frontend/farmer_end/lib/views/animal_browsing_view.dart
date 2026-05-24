@@ -21,6 +21,20 @@ class _AnimalBrowsingViewState extends State<AnimalBrowsingView> {
     });
   }
 
+  String _getAnimalEmoji(String species) {
+    switch (species.toUpperCase()) {
+      case 'COW': return '🐄';
+      case 'PIG': return '🐖';
+      case 'SHEEP': return '🐑';
+      case 'CHICKEN': return '🐔';
+      case 'GOAT': return '🐐';
+      case 'DUCK': return '🦆';
+      case 'RABBIT': return '🐇';
+      case 'HORSE': return '🐎';
+      default: return '🐾';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AnimalViewModel>(
@@ -104,8 +118,8 @@ class _AnimalBrowsingViewState extends State<AnimalBrowsingView> {
                         radius: 30,
                         backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
                         child: Text(
-                          species[0],
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          _getAnimalEmoji(species),
+                          style: const TextStyle(fontSize: 32),
                         ),
                       ),
                       const SizedBox(height: 12),

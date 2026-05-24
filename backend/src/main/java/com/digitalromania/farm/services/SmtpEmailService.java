@@ -44,4 +44,28 @@ public class SmtpEmailService implements EmailService {
         mailSender.send(message);
         log.info("2FA code emailed to {}", toEmail);
     }
+
+    @Override
+    public void sendDossierStatusEmail(String toEmail, String recipientName, String status, String documentUrl) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromAddress);
+        message.setTo(toEmail);
+        message.setSubject("ROeID — Actualizare Status Dosar");
+        message.setText("""
+                Bună ziua, %s,
+
+                Vă informăm că statusul dosarului dumneavoastră a fost actualizat la: %s.
+                
+                %s
+
+                — Echipa ROeID (Platforma APIA/ANSVSA)
+                """.formatted(
+                    recipientName, 
+                    status,
+                    documentUrl != null ? "Puteți descărca documentul aferent accesând platforma sau link-ul direct (dacă este expus public)." : ""
+                ));
+
+        mailSender.send(message);
+        log.info("Dossier status update emailed to {}", toEmail);
+    }
 }

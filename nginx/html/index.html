@@ -92,9 +92,11 @@
         .farmer { --c: #2E7D32; --d: #1B5E20; }
         .vet { --c: #1565C0; --d: #0D47A1; }
         .admin { --c: #5E35B1; --d: #4527A0; }
+        .mail { --c: #E65100; --d: #BF360C; }
         .portal-card.farmer:hover { border-color: #2E7D32; }
         .portal-card.vet:hover { border-color: #1565C0; }
         .portal-card.admin:hover { border-color: #5E35B1; }
+        .portal-card.mail:hover { border-color: #E65100; }
         .portal-card .badge {
             background: color-mix(in srgb, var(--c) 12%, white);
             color: var(--d);
@@ -129,6 +131,13 @@
             <div class="icon">🏛️</div>
             <div class="title">APIA Administration</div>
             <div class="desc">Subsidy validation queue, analytics & immutable audit trail.</div>
+        </a>
+
+        <a href="/mail/" class="portal-card mail">
+            <span class="badge">MAIL PORTAL</span>
+            <div class="icon">📧</div>
+            <div class="title">2FA & Notifications</div>
+            <div class="desc">Check verification codes and status updates here.</div>
         </a>
     </div>
 </body>
