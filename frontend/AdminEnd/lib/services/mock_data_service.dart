@@ -14,7 +14,6 @@ class MockDataService {
         requestedAmount: 12500.0,
         submissionDate: DateTime.now().subtract(const Duration(days: 2)),
         status: ApplicationStatus.pending,
-        documents: ['vet_cert_01.pdf', 'land_ownership.pdf'],
       ),
       Application(
         id: 'APP-002',
@@ -24,7 +23,6 @@ class MockDataService {
         requestedAmount: 6200.0,
         submissionDate: DateTime.now().subtract(const Duration(days: 1)),
         status: ApplicationStatus.pending,
-        documents: ['vet_cert_02.pdf'],
       ),
       Application(
         id: 'APP-003',
@@ -34,7 +32,6 @@ class MockDataService {
         requestedAmount: 30000.0,
         submissionDate: DateTime.now().subtract(const Duration(hours: 5)),
         status: ApplicationStatus.pending,
-        documents: ['vet_cert_03.pdf', 'env_permit.pdf'],
       ),
     ];
   }

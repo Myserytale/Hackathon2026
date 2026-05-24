@@ -47,8 +47,4 @@ jobs:
       working-directory: ./backend
       run: ./gradlew build --no-daemon
 
-    - name: Build Docker Image
-      run: docker compose build
 
-    - name: Push to Container Registry (Mock)
-      run: echo "In a real scenario, this would push to DockerHub/GHCR for Render/Railway to pull."

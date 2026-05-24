@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Allow swagger
                 .requestMatchers("/actuator/**").permitAll() // Allow Prometheus scraping
+                .requestMatchers("/api/grant-dossiers/*/download/*").permitAll() // Allow browser PDF downloads
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

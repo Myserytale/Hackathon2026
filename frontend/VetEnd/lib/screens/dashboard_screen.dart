@@ -54,7 +54,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.logout_rounded),
             tooltip: 'Deconectare',
           ),
-          const SizedBox(width: 8),
+          if (_selectedIndex == 0)
+            IconButton(
+              onPressed: () => context.read<DataService>().loadData(),
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh Alerte",
+            ),
         ],
       ),
       body: Column(
@@ -113,12 +118,12 @@ class PendingAlertsView extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: alerts.length,
-      itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: ActionCard(
+    return RefreshIndicator(
+      onRefresh: () => context.read<DataService>().loadData(),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 32),
+        itemCount: alerts.length,
+        itemBuilder: (context, index) => ActionCard(
           alert: alerts[index],
           onReject: () => context.read<DataService>().rejectAlert(alerts[index].id),
         ),
