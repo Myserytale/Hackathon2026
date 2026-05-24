@@ -43,6 +43,7 @@ dependencies:
   sqflite_common_ffi_web: ^1.0.2
   url_launcher: ^6.2.6
   file_picker: ^8.0.3
+  google_fonts: ^8.1.0
 
 dev_dependencies:
   flutter_test:

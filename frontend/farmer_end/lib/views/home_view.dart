@@ -232,16 +232,6 @@ class HomeView extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await _sendVetRequest(context);
-            },
-            child: const Text('Send Request'),
-          ),
-        ],
       ),
     );
   }
@@ -332,6 +322,39 @@ class HomeView extends StatelessWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
+        ],
+      ),
+    );
+  }
+
+  Widget _dashboardButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        backgroundColor: color.withOpacity(0.1),
+        foregroundColor: color,
+        elevation: 0,
+        side: BorderSide(color: color, width: 2),
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 28),
+              const SizedBox(width: 16),
+              Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const Icon(Icons.arrow_forward_ios, size: 20),
         ],
       ),
     );
