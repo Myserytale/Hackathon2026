@@ -22,20 +22,6 @@ public class PdfGeneratorService {
         }
     }
 
-    private String stripDiacritics(String input) {
-        if (input == null) return null;
-        return input.replace("ă", "a")
-                    .replace("â", "a")
-                    .replace("î", "i")
-                    .replace("ș", "s")
-                    .replace("ț", "t")
-                    .replace("Ă", "A")
-                    .replace("Â", "A")
-                    .replace("Î", "I")
-                    .replace("Ș", "S")
-                    .replace("Ț", "T");
-    }
-
     public String generateApiaGrantRequest(String farmName, String iban, String animalTag, String signatureBase64) {
         String fileName = "APIA_Grant_" + animalTag + "_" + System.currentTimeMillis() + ".pdf";
         String filePath = STORAGE_DIR + fileName;
@@ -84,7 +70,7 @@ public class PdfGeneratorService {
                 contentStream.newLine();
                 contentStream.showText("Subsemnatul/Reprezentantul legal al exploatatiei: ");
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 12);
-                contentStream.showText(farmName != null && !farmName.isEmpty() ? stripDiacritics(farmName) : "__________________");
+                contentStream.showText(farmName != null && !farmName.isEmpty() ? farmName : "__________________");
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 contentStream.newLine();
                 
@@ -97,7 +83,7 @@ public class PdfGeneratorService {
                 contentStream.newLine();
                 
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 16);
-                contentStream.showText("CROTALIA: " + (animalTag != null && !animalTag.isEmpty() ? stripDiacritics(animalTag) : "__________________"));
+                contentStream.showText("CROTALIA: " + (animalTag != null && !animalTag.isEmpty() ? animalTag : "__________________"));
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 contentStream.newLine();
                 contentStream.newLine();
@@ -108,7 +94,7 @@ public class PdfGeneratorService {
                 contentStream.newLine();
                 
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
-                contentStream.showText("IBAN: " + (iban != null && !iban.isEmpty() ? stripDiacritics(iban) : "__________________"));
+                contentStream.showText("IBAN: " + (iban != null && !iban.isEmpty() ? iban : "__________________"));
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 contentStream.newLine();
                 contentStream.newLine();
@@ -211,7 +197,7 @@ public class PdfGeneratorService {
                 contentStream.showText("Subsemnatul, medic veterinar de libera practica imputernicit, ");
                 contentStream.newLine();
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
-                contentStream.showText("Dr. " + stripDiacritics(vetName));
+                contentStream.showText("Dr. " + vetName);
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 contentStream.newLine();
                 contentStream.newLine();
@@ -223,7 +209,7 @@ public class PdfGeneratorService {
                 contentStream.newLine();
                 
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 16);
-                contentStream.showText("CROTALIA: " + stripDiacritics(animalTag));
+                contentStream.showText("CROTALIA: " + animalTag);
                 contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
                 contentStream.newLine();
                 contentStream.newLine();
