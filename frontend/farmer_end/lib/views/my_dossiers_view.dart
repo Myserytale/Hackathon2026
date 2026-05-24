@@ -28,8 +28,9 @@ class _MyDossiersViewState extends State<MyDossiersView> {
     final authService = Provider.of<AuthService>(context, listen: false);
     final token = authService.token;
     
-    // Hardcoded farmer ID 1 for Hackathon demo purposes
-    // In a real app, the ID comes from auth token
+    List<dynamic> allDossiers = [];
+    
+    // Fetch grant dossiers
     try {
       final response = await http.get(
         Uri.parse('${ApiConfig.apiBaseUrl}/grant-dossiers/farmer/1'),
@@ -41,16 +42,46 @@ class _MyDossiersViewState extends State<MyDossiersView> {
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as List<dynamic>;
-        setState(() {
-          _dossiers = data;
-          _isLoading = false;
-        });
-      } else {
-        setState(() => _isLoading = false);
+        allDossiers.addAll(data);
       }
     } catch (e) {
       debugPrint('Error fetching dossiers: $e');
-      setState(() => _isLoading = false);
+    }
+    
+    // Fetch incidents (death reports, vet requests)
+    try {
+      final incResponse = await http.get(
+        Uri.parse('${ApiConfig.apiBaseUrl}/incidents'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      if (incResponse.statusCode == 200) {
+        final incData = jsonDecode(incResponse.body) as List<dynamic>;
+        // Map incidents to a dossier-like structure for display
+        for (var inc in incData) {
+          allDossiers.add({
+            '_isIncident': true,
+            'id': inc['id'],
+            'type': inc['type'] ?? 'Incident',
+            'description': inc['description'] ?? '',
+            'status': inc['status'] ?? 'PENDING',
+            'reportedAt': inc['reportedAt'],
+            'animalId': inc['animalId'],
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching incidents: $e');
+    }
+    
+    if (mounted) {
+      setState(() {
+        _dossiers = allDossiers;
+        _isLoading = false;
+      });
     }
   }
 
@@ -99,6 +130,21 @@ class _MyDossiersViewState extends State<MyDossiersView> {
         label = 'Respins de APIA';
         icon = Icons.warning_amber;
         break;
+      case 'RESOLVED':
+        color = Colors.green;
+        label = 'Confirmat de Veterinar';
+        icon = Icons.check_circle;
+        break;
+      case 'REJECTED':
+        color = Colors.red;
+        label = 'Respins';
+        icon = Icons.cancel;
+        break;
+      case 'PENDING':
+        color = Colors.orange;
+        label = 'În Așteptare';
+        icon = Icons.pending;
+        break;
       case 'DRAFT_FERMIER':
       default:
         color = Colors.grey;
@@ -133,6 +179,12 @@ class _MyDossiersViewState extends State<MyDossiersView> {
                     itemCount: _dossiers.length,
                     itemBuilder: (context, index) {
                       final dossier = _dossiers[index];
+                      final isIncident = dossier['_isIncident'] == true;
+                      
+                      if (isIncident) {
+                        return _buildIncidentCard(dossier);
+                      }
+                      
                       final animalTag = dossier['animal']?['tagNumber'] ?? 'N/A';
                       final createdAt = dossier['createdAt'] != null 
                           ? dossier['createdAt'].toString().substring(0, 10) 
@@ -248,6 +300,83 @@ class _MyDossiersViewState extends State<MyDossiersView> {
                     },
                   ),
                 ),
+    );
+  }
+
+  Widget _buildIncidentCard(Map<String, dynamic> incident) {
+    final type = incident['type'] ?? 'Incident';
+    final description = incident['description'] ?? '';
+    final status = incident['status'] ?? 'PENDING';
+    final reportedAt = incident['reportedAt'] != null
+        ? incident['reportedAt'].toString().substring(0, 10)
+        : 'Necunoscut';
+    final incidentId = incident['id'];
+
+    IconData typeIcon;
+    Color typeColor;
+    String typeLabel;
+    
+    switch (type) {
+      case 'Death':
+        typeIcon = Icons.error_outline;
+        typeColor = Colors.red;
+        typeLabel = 'Raportare Deces Animal';
+        break;
+      case 'Vet Request':
+        typeIcon = Icons.medical_services;
+        typeColor = Colors.orange;
+        typeLabel = 'Cerere Vizită Veterinar';
+        break;
+      default:
+        typeIcon = Icons.report;
+        typeColor = Colors.blue;
+        typeLabel = 'Incident: $type';
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(typeIcon, color: typeColor, size: 24),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          typeLabel,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text('#INC-$incidentId', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(description, style: const TextStyle(fontSize: 14)),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                const SizedBox(width: 8),
+                Text('Data raportării: $reportedAt', style: const TextStyle(fontSize: 14)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildStatusChip(status),
+          ],
+        ),
+      ),
     );
   }
 

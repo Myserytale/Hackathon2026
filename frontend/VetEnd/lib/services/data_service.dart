@@ -77,7 +77,10 @@ class DataService extends ChangeNotifier {
           final incId = dossierId.substring(4);
           final response = await http.put(
             Uri.parse('$baseUrl/incidents/$incId/status'),
-            headers: _headers,
+            headers: {
+              'Content-Type': 'text/plain',
+              if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+            },
             body: "RESOLVED",
           );
           if (response.statusCode == 200) {
@@ -141,7 +144,10 @@ class DataService extends ChangeNotifier {
           final incId = dossierId.substring(4);
           final response = await http.put(
             Uri.parse('$baseUrl/incidents/$incId/status'),
-            headers: _headers,
+            headers: {
+              'Content-Type': 'text/plain',
+              if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+            },
             body: "REJECTED",
           );
           if (response.statusCode == 200) {
