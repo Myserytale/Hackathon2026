@@ -54,7 +54,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.logout_rounded),
             tooltip: 'Deconectare',
           ),
-          const SizedBox(width: 8),
+          if (_selectedIndex == 0)
+            IconButton(
+              onPressed: () => context.read<DataService>().loadData(),
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh Alerte",
+            ),
         ],
       ),
       body: Column(
@@ -76,19 +81,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          if (_selectedIndex == 0)
-            IconButton(
-              onPressed: () => context.read<DataService>().loadData(),
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh Dosare",
-            ),
-          IconButton(
-            onPressed: () => context.read<AuthService>().logout(),
-            icon: const Icon(Icons.logout),
-            tooltip: "Logout",
           ),
           Expanded(child: _screens[_selectedIndex]),
         ],
