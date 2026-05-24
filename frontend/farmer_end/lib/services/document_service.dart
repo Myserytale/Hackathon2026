@@ -5,11 +5,12 @@ import '../config/api_config.dart';
 class DocumentService {
   static String get baseUrl => '${ApiConfig.apiBaseUrl}/documents';
 
-  Future<bool> uploadDocument(String animalId, String docType, List<int> fileBytes, String filename) async {
+  Future<bool> uploadDocument(String animalId, String docType, List<int> fileBytes, String filename, String token) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
+      var request = http.MultipartRequest('POST', Uri.parse(baseUrl));
       request.fields['animalId'] = animalId;
-      request.fields['docType'] = docType;
+      request.fields['type'] = docType;
+      request.headers['Authorization'] = 'Bearer $token';
       
       var multipartFile = http.MultipartFile.fromBytes(
         'file',

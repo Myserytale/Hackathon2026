@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/animal.dart';
 import '../services/document_service.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
+import 'package:file_picker/file_picker.dart';
 
 class AnimalDetailView extends StatelessWidget {
   final Animal animal;
@@ -51,27 +54,38 @@ class AnimalDetailView extends StatelessWidget {
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                   onPressed: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Simulating file selection...')),
+                    FilePickerResult? result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['pdf', 'jpg', 'png'],
+                      withData: true,
                     );
-                    
-                    // Mocking file bytes for hackathon demonstration
-                    List<int> mockFileBytes = [0, 1, 2, 3];
-                    
-                    bool success = await DocumentService().uploadDocument(
-                      animal.id.toString(),
-                      'PASSPORT',
-                      mockFileBytes,
-                      'mock_passport.pdf',
-                    );
-                    
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(success ? 'Document Uploaded via MultipartFormData!' : 'Upload Failed. Ensure Backend is running.'),
-                          backgroundColor: success ? Colors.green : Colors.red,
-                        ),
+
+                    if (result != null && result.files.single.bytes != null) {
+                      final fileBytes = result.files.single.bytes!.toList();
+                      final fileName = result.files.single.name;
+
+                      bool success = await DocumentService().uploadDocument(
+                        animal.id.toString(),
+                        'PASSPORT',
+                        fileBytes,
+                        fileName,
+                        Provider.of<AuthService>(context, listen: false).token!,
                       );
+                      
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(success ? 'Document Uploaded Successfully!' : 'Upload Failed.'),
+                            backgroundColor: success ? Colors.green : Colors.red,
+                          ),
+                        );
+                      }
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('No file selected')),
+                        );
+                      }
                     }
                   },
                 ),
