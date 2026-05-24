@@ -38,18 +38,24 @@ public class DataSeeder implements CommandLineRunner {
             
             User farmer = new User();
             farmer.setUsername("test_farmer");
+            farmer.setName("Test Farmer");
+            farmer.setEmail("test_farmer@demo.roeid.local");
             farmer.setPassword(passwordEncoder.encode("password123"));
             farmer.setRole(Role.FARMER);
             userRepository.save(farmer);
 
             User vet = new User();
             vet.setUsername("vet_ana");
+            vet.setName("Dr. Ana Popescu");
+            vet.setEmail("vet_ana@demo.roeid.local");
             vet.setPassword(passwordEncoder.encode("vet123"));
             vet.setRole(Role.VET);
             userRepository.save(vet);
 
             User admin = new User();
             admin.setUsername("admin_maria");
+            admin.setName("Maria Admin");
+            admin.setEmail("admin_maria@demo.roeid.local");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole(Role.ADMIN);
             userRepository.save(admin);

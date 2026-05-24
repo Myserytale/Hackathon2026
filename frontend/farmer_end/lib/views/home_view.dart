@@ -1,8 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../services/auth_service.dart';
+import '../theme/roeid_theme.dart';
+import '../widgets/roeid_ui.dart';
 import 'animal_browsing_view.dart';
 import 'report_birth_view.dart';
 import 'funding_application_view.dart';
@@ -13,11 +17,11 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = context.roeid.config;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Farm Management'),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      appBar: RoeidPortalAppBar(
+        title: 'Farm Management',
         actions: [
           IconButton(
             icon: const Icon(Icons.logout_rounded),
@@ -26,172 +30,169 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 40),
-            _dashboardButton(
-              context,
-              icon: Icons.list_alt,
-              label: 'View My Animals',
-              color: Colors.green,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AnimalBrowsingView()),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            _dashboardButton(
-              context,
-              icon: Icons.add_chart,
-              label: 'Report Births/Deaths',
-              color: Colors.blue,
-              onPressed: () {
-                _showReportActionDialog(context);
-              },
-            ),
-            const SizedBox(height: 20),
-            _dashboardButton(
-              context,
-              icon: Icons.medical_services,
-              label: 'Contact the Vet',
-              color: Colors.orange,
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Request Vet Visit'),
-                    content: const Text(
-                      'A notification will be sent to your assigned veterinarian (vet_ana) to schedule a farm visit.\n\nThis feature uses the SSE notification system.',
+      body: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Icon(brand.icon, size: 40, color: brand.primary),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Welcome back', style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Manage animals, reports, and subsidy applications.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          Navigator.pop(ctx);
-                          try {
-                            final authService = context.read<AuthService>();
-                            final response = await http.post(
-                              Uri.parse('http://localhost:8080/api/incidents'),
-                              headers: {
-                                'Content-Type': 'application/json',
-                                if (authService.token != null) 'Authorization': 'Bearer ${authService.token}',
-                              },
-                              body: jsonEncode({
-                                'type': 'Vet Request',
-                                'description': 'The farmer has requested a vet visit.',
-                                'location': 'Farm Headquarters',
-                                'status': 'PENDING',
-                                'reportedAt': DateTime.now().toIso8601String(),
-                              }),
-                            );
-
-                            if (response.statusCode == 200) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Vet visit request sent to the Vet Portal!'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
-                            } else {
-                              throw Exception('Failed to send request');
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Could not reach backend. Using offline fallback.'),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                        child: const Text('Send Request', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
                   ),
-                );
-              },
+                  RoeidStatusBadge(label: brand.badge),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            _dashboardButton(
-              context,
-              icon: Icons.monetization_on,
-              label: 'Apply for Subsidy (APIA)',
-              color: Colors.purple,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FundingApplicationView()),
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          RoeidActionTile(
+            icon: Icons.list_alt,
+            label: 'View My Animals',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AnimalBrowsingView()),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          RoeidActionTile(
+            icon: Icons.add_chart,
+            label: 'Report Births / Deaths',
+            accent: brand.primaryDark,
+            onPressed: () => _showReportActionDialog(context),
+          ),
+          const SizedBox(height: 16),
+          RoeidActionTile(
+            icon: Icons.medical_services_outlined,
+            label: 'Contact the Vet',
+            accent: const Color(0xFF1565C0),
+            onPressed: () => _showVetRequestDialog(context),
+          ),
+          const SizedBox(height: 16),
+          RoeidActionTile(
+            icon: Icons.monetization_on_outlined,
+            label: 'Apply for Subsidy (APIA)',
+            accent: const Color(0xFF5E35B1),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FundingApplicationView()),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
+  void _showVetRequestDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Request Vet Visit'),
+        content: const Text(
+          'A notification will be sent to your assigned veterinarian to schedule a farm visit.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _sendVetRequest(context);
+            },
+            child: const Text('Send Request'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendVetRequest(BuildContext context) async {
+    try {
+      final authService = context.read<AuthService>();
+      final response = await http.post(
+        Uri.parse('${ApiConfig.apiBaseUrl}/incidents'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (authService.token != null) 'Authorization': 'Bearer ${authService.token}',
+        },
+        body: jsonEncode({
+          'type': 'Vet Request',
+          'description': 'The farmer has requested a vet visit.',
+          'location': 'Farm Headquarters',
+          'status': 'PENDING',
+          'reportedAt': DateTime.now().toIso8601String(),
+        }),
+      );
+
+      if (!context.mounted) return;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vet visit request sent to the Vet Portal!'),
+            backgroundColor: RoeidTheme.success,
+          ),
+        );
+      } else {
+        throw Exception('Failed to send request');
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not reach backend. Please try again later.'),
+            backgroundColor: RoeidTheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   void _showReportActionDialog(BuildContext context) {
+    final brand = context.roeid;
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
+      builder: (context) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'What would you like to report?',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
+            Text('What would you like to report?', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 20),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Colors.green,
-                child: Icon(Icons.child_care, color: Colors.white),
-              ),
+              leading: CircleAvatar(backgroundColor: brand.primary, child: const Icon(Icons.child_care, color: Colors.white)),
               title: const Text('New Birth', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('Add a new newborn animal to inventory'),
+              subtitle: const Text('Add a newborn animal to inventory'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ReportBirthView()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportBirthView()));
               },
             ),
-            const SizedBox(height: 12),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Colors.red,
-                child: Icon(Icons.error_outline, color: Colors.white),
-              ),
+              leading: CircleAvatar(backgroundColor: RoeidTheme.error, child: const Icon(Icons.error_outline, color: Colors.white)),
               title: const Text('Animal Death', style: TextStyle(fontWeight: FontWeight.bold)),
               subtitle: const Text('Remove a deceased animal from inventory'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ReportDeathBrowsingView()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportDeathBrowsingView()));
               },
             ),
-            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -205,14 +206,8 @@ class HomeView extends StatelessWidget {
         title: const Text('Log out?'),
         content: const Text('Are you sure you want to disconnect from the farmer portal?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Log out'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
         ],
       ),
     );
@@ -221,36 +216,4 @@ class HomeView extends StatelessWidget {
       Provider.of<AuthService>(context, listen: false).logout();
     }
   }
-
-  Widget _dashboardButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        backgroundColor: color.withOpacity(0.1),
-        foregroundColor: color,
-        elevation: 0,
-        side: BorderSide(color: color, width: 2),
-      ),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 28),
-          const SizedBox(width: 15),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
 }
-

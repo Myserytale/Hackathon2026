@@ -27,7 +27,12 @@ class AuthService extends ChangeNotifier {
     return 'Request failed (${response.statusCode})';
   }
 
-  Future<bool> register(String username, String password) async {
+  Future<bool> register({
+    required String username,
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -38,6 +43,8 @@ class AuthService extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
+          'name': name,
+          'email': email.trim().toLowerCase(),
           'password': password,
           'role': 'FARMER',
         }),
@@ -59,7 +66,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -69,7 +76,7 @@ class AuthService extends ChangeNotifier {
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'username': username,
+          'email': email.trim().toLowerCase(),
           'password': password,
           'expectedRole': 'FARMER',
         }),

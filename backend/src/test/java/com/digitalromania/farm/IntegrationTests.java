@@ -7,6 +7,7 @@ import com.digitalromania.farm.models.User;
 import com.digitalromania.farm.repositories.AnimalRepository;
 import com.digitalromania.farm.repositories.AuditLogRepository;
 import com.digitalromania.farm.repositories.UserRepository;
+import com.digitalromania.farm.services.TestEmailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.datasource.driver-class-name=org.h2.Driver",
     "spring.datasource.username=sa",
     "spring.datasource.password=",
-    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
+    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+    "spring.sql.init.mode=never"
 })
 @Transactional
 public class IntegrationTests {
@@ -79,9 +81,13 @@ public class IntegrationTests {
         animalRepository.deleteAll();
         auditLogRepository.deleteAll();
         userRepository.deleteAll();
+        TestEmailService.lastOtp = null;
+        TestEmailService.lastRecipientEmail = null;
 
         User farmer = new User();
         farmer.setUsername("test_farmer");
+        farmer.setName("Test Farmer");
+        farmer.setEmail("test_farmer@demo.roeid.local");
         farmer.setPassword(passwordEncoder.encode("password123"));
         farmer.setRole(Role.FARMER);
         userRepository.save(farmer);
@@ -89,32 +95,31 @@ public class IntegrationTests {
 
     @Test
     void test2FAFlow() throws Exception {
-        // Step 1: Login
         Map<String, String> loginRequest = Map.of(
-                "username", "test_farmer",
+                "email", "test_farmer@demo.roeid.local",
                 "password", "password123",
                 "expectedRole", "FARMER"
         );
-        
+
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
-        
+
         Map<String, String> loginResponse = objectMapper.readValue(loginResult.getResponse().getContentAsString(), Map.class);
         String tempToken = loginResponse.get("token");
         assertThat(tempToken).isNotNull();
-        
-        // Step 2: Verify 2FA
-        Map<String, String> verifyRequest = Map.of("tempToken", tempToken, "code", com.digitalromania.farm.controllers.AuthController.LAST_GENERATED_OTP);
-        
+        assertThat(TestEmailService.lastOtp).isNotNull();
+
+        Map<String, String> verifyRequest = Map.of("tempToken", tempToken, "code", TestEmailService.lastOtp);
+
         MvcResult verifyResult = mockMvc.perform(post("/api/auth/verify-2fa")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(verifyRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
-        
+
         Map<String, String> verifyResponse = objectMapper.readValue(verifyResult.getResponse().getContentAsString(), Map.class);
         String finalToken = verifyResponse.get("token");
         assertThat(finalToken).isNotNull();
@@ -124,6 +129,8 @@ public class IntegrationTests {
     void testRegisterAndLoginAsFarmer() throws Exception {
         Map<String, String> registerRequest = Map.of(
                 "username", "new_farmer",
+                "name", "New Farmer",
+                "email", "new_farmer@example.com",
                 "password", "secret123",
                 "role", "FARMER"
         );
@@ -137,7 +144,7 @@ public class IntegrationTests {
         assertThat(userRepository.findByUsername("new_farmer").get().getRole()).isEqualTo(Role.FARMER);
 
         Map<String, String> loginRequest = Map.of(
-                "username", "new_farmer",
+                "email", "new_farmer@example.com",
                 "password", "secret123",
                 "expectedRole", "FARMER"
         );
@@ -151,7 +158,7 @@ public class IntegrationTests {
     @Test
     void testFarmerCannotLoginToVetPortal() throws Exception {
         Map<String, String> loginRequest = Map.of(
-                "username", "test_farmer",
+                "email", "test_farmer@demo.roeid.local",
                 "password", "password123",
                 "expectedRole", "VET"
         );
@@ -166,6 +173,8 @@ public class IntegrationTests {
     void testDuplicateUsernameRegistration() throws Exception {
         Map<String, String> registerRequest = Map.of(
                 "username", "test_farmer",
+                "name", "Duplicate",
+                "email", "other@example.com",
                 "password", "secret123",
                 "role", "FARMER"
         );
@@ -184,17 +193,15 @@ public class IntegrationTests {
         animal.setBreed("Holstein");
         animal.setBirthDate(LocalDate.now());
         animal.setOwnerId(1L);
-        
+
         Animal savedAnimal = animalRepository.saveAndFlush(animal);
-        
-        // Delete
+
         animalRepository.delete(savedAnimal);
         animalRepository.flush();
-        
-        // Verify audit log
+
         List<AuditLog> logs = auditLogRepository.findAll();
         assertThat(logs).isNotEmpty();
-        
+
         boolean hasDeleteLog = logs.stream()
                 .anyMatch(log -> "DELETE".equals(log.getAction()) && "Animal".equals(log.getEntityName()));
         assertThat(hasDeleteLog).isTrue();

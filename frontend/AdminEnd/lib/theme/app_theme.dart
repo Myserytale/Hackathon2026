@@ -1,57 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'roeid_theme.dart';
 
 class AppTheme {
-  // WCAG 2.1 AA compliant colors
-  static const Color primaryColor = Color(0xFF1A1A1A); // Dark Charcoal
-  static const Color backgroundColor = Color(0xFFF5F7F9); // Light Grey
-  static const Color surfaceColor = Colors.white;
-  static const Color accentColor = Color(0xFF0D47A1); // Deep Blue
+  static ThemeData get lightTheme => RoeidTheme.light();
 
-  static const Color successColor = Color(0xFF2E7D32); // Deep Green
-  static const Color errorColor = Color(0xFFC62828); // Dark Red
-  static const Color pendingColor = Color(0xFF0277BD); // Blue
-
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: accentColor,
-        primary: primaryColor,
-        onPrimary: Colors.white,
-        secondary: accentColor,
-        surface: backgroundColor,
-        error: errorColor,
-      ),
-      textTheme: GoogleFonts.interTextTheme().copyWith(
-        displayLarge: GoogleFonts.inter(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: primaryColor,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-          color: primaryColor,
-        ),
-        bodyLarge: GoogleFonts.inter(fontSize: 16, color: primaryColor),
-        bodyMedium: GoogleFonts.inter(fontSize: 14, color: primaryColor),
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: surfaceColor,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: TextStyle(
-          color: primaryColor,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      extensions: const [
-        SidebarTheme(backgroundColor: primaryColor, selectedColor: accentColor),
-      ],
-    );
-  }
+  static Color get primaryColor => RoeidTheme.config().primaryDark;
+  static Color get backgroundColor => RoeidTheme.background;
+  static Color get surfaceColor => RoeidTheme.surface;
+  static Color get accentColor => RoeidTheme.config().primary;
+  static Color get successColor => RoeidTheme.success;
+  static Color get errorColor => RoeidTheme.error;
+  static Color get pendingColor => RoeidTheme.config().primary;
 }
 
 class SidebarTheme extends ThemeExtension<SidebarTheme> {
