@@ -19,32 +19,23 @@ services:
   farmer-frontend:
     build:
       context: ./frontend/farmer_end
-    ports:
-      - "8081:80"
     restart: always
 
   vet-frontend:
     build:
       context: ./frontend/VetEnd
-    ports:
-      - "8082:80"
     restart: always
 
   admin-frontend:
     build:
       context: ./frontend/AdminEnd
-    ports:
-      - "8083:80"
     restart: always
 
-  # ── Local email catcher (2FA codes) — open http://localhost:8025 ──
+  # ── Local email catcher (2FA codes) — routed internally ──
   mailpit:
     image: axllent/mailpit:latest
     environment:
       - MP_WEBROOT=/mail/
-    ports:
-      - "8025:8025"
-      - "1025:1025"
     restart: always
 
   backend:
@@ -146,12 +137,19 @@ services:
     ports:
       - "443:443"
       - "80:80"
+    networks:
+      - default
+      - caddy_net
     restart: always
     depends_on:
       - backend
       - farmer-frontend
       - vet-frontend
       - admin-frontend
+
+networks:
+  caddy_net:
+    external: true
 
 volumes:
   postgres_data:
