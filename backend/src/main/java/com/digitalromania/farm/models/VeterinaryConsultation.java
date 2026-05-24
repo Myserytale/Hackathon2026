@@ -35,5 +35,5 @@ public class VeterinaryConsultation {
     @Column(nullable = false)
     private LocalDate consultationDate;
 
-    private boolean deleted = false;
+    private Boolean deleted = false;
 }

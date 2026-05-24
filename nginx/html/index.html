@@ -3,104 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Romania - Agriculture Hub</title>
+    <title>Digital Romania - ROeID Agriculture Hub</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        * { box-sizing: border-box; }
         body {
-            background-color: #16191e;
-            color: #d8dee9;
+            background: #F4F7FB;
+            color: #1A2332;
             font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            padding: 48px 20px;
+        }
+        .hero {
             text-align: center;
+            max-width: 720px;
+            margin-bottom: 48px;
+        }
+        .wordmark {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #1A2332;
+            margin-bottom: 16px;
         }
         h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            color: #88c0d0;
-            text-shadow: 0 0 10px rgba(136, 192, 208, 0.3);
+            font-size: 2.5rem;
+            margin: 0 0 12px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
         p {
-            font-size: 1.2rem;
-            margin-bottom: 3rem;
-            color: #81a1c1;
+            font-size: 1.1rem;
+            color: #64748B;
+            margin: 0;
+            line-height: 1.6;
         }
         .portal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            max-width: 1000px;
-            width: 90%;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            max-width: 960px;
+            width: 100%;
         }
         .portal-card {
-            background: #2e3440;
-            border-radius: 12px;
-            padding: 2rem;
+            background: #fff;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 28px 24px;
             text-decoration: none;
-            color: #eceff4;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
         }
         .portal-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(26, 35, 50, 0.08);
         }
-        .portal-card.farmer:hover {
-            border-color: #a3be8c;
-            box-shadow: 0 10px 20px rgba(163, 190, 140, 0.2);
-        }
-        .portal-card.vet:hover {
-            border-color: #ebcb8b;
-            box-shadow: 0 10px 20px rgba(235, 203, 139, 0.2);
-        }
-        .portal-card.admin:hover {
-            border-color: #bf616a;
-            box-shadow: 0 10px 20px rgba(191, 97, 106, 0.2);
+        .badge {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
         }
         .icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 2.2rem;
+            margin-bottom: 12px;
         }
         .title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
         .desc {
             font-size: 0.95rem;
-            color: #d8dee9;
-            opacity: 0.8;
+            color: #64748B;
+            line-height: 1.5;
+        }
+        .farmer { --c: #2E7D32; --d: #1B5E20; }
+        .vet { --c: #1565C0; --d: #0D47A1; }
+        .admin { --c: #5E35B1; --d: #4527A0; }
+        .portal-card.farmer:hover { border-color: #2E7D32; }
+        .portal-card.vet:hover { border-color: #1565C0; }
+        .portal-card.admin:hover { border-color: #5E35B1; }
+        .portal-card .badge {
+            background: color-mix(in srgb, var(--c) 12%, white);
+            color: var(--d);
+            border: 1px solid color-mix(in srgb, var(--c) 25%, white);
         }
     </style>
 </head>
 <body>
-    <h1>Digital Romania</h1>
-    <p>Unified Farm Animal Management System</p>
-    
+    <div class="hero">
+        <div class="wordmark">🛡️ ROeID · Digital Romania</div>
+        <h1>Unified Agriculture Registry</h1>
+        <p>One national platform for farmers, veterinarians, and APIA administrators — connected, secure, and ROeID-authenticated.</p>
+    </div>
+
     <div class="portal-grid">
         <a href="/farmer/" class="portal-card farmer">
+            <span class="badge">FARMER PORTAL</span>
             <div class="icon">🚜</div>
             <div class="title">Farmer Portal</div>
-            <div class="desc">Digital Wallet & Subsidy Status</div>
+            <div class="desc">Digital wallet, animals, births/deaths & subsidy applications.</div>
         </a>
-        
+
         <a href="/vet/" class="portal-card vet">
+            <span class="badge">VET PORTAL</span>
             <div class="icon">🩺</div>
             <div class="title">Veterinary Portal</div>
-            <div class="desc">Health Certificates & Status Tracking</div>
+            <div class="desc">Health certificates, incident alerts & transparency ledger.</div>
         </a>
-        
+
         <a href="/admin/" class="portal-card admin">
+            <span class="badge">ADMIN PORTAL</span>
             <div class="icon">🏛️</div>
-            <div class="title">APIA Bureaucracy</div>
-            <div class="desc">Subsidy Validation & Processing</div>
+            <div class="title">APIA Administration</div>
+            <div class="desc">Subsidy validation queue, analytics & immutable audit trail.</div>
         </a>
     </div>
 </body>

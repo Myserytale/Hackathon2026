@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/data_service.dart';
 import '../services/auth_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/roeid_theme.dart';
+import '../widgets/roeid_ui.dart';
 import '../widgets/action_card.dart';
 import 'ledger_screen.dart';
-import 'consultation_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,27 +19,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     const PendingAlertsView(),
-    const ConsultationScreen(),
     const LedgerScreen(),
   ];
 
+  Future<void> _confirmLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Deconectare'),
+        content: const Text('Sigur doriți să vă deconectați din portalul veterinar?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Anulează')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Deconectare')),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      context.read<AuthService>().logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final brand = context.roeid.config;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Bună ziua, Dr. Popescu", style: TextStyle(fontWeight: FontWeight.bold)),
-            Row(
+      appBar: RoeidPortalAppBar(
+        title: 'Portal Veterinar',
+        actions: [
+          RoeidStatusBadge(label: brand.badge),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: _confirmLogout,
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Deconectare',
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Row(
               children: [
                 Container(
-                  width: 12,
-                  height: 12,
-                  decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(color: RoeidTheme.success, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 8),
-                const Text("Sincronizat cu Cloud Guvernamental", style: TextStyle(fontSize: 14)),
+                Text(
+                  'Sincronizat cu Cloud Guvernamental',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           ],
@@ -56,25 +90,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.logout),
             tooltip: "Logout",
           ),
+          Expanded(child: _screens[_selectedIndex]),
         ],
       ),
-      body: _screens[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) => setState(() => _selectedIndex = index),
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.pending_actions, size: 32),
-            label: "Alerte Pendinte",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.medical_services, size: 32),
-            label: "Consultații",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_edu, size: 32),
-            label: "Registru Ledger",
-          ),
+          NavigationDestination(icon: Icon(Icons.pending_actions_outlined), selectedIcon: Icon(Icons.pending_actions), label: 'Alerte'),
+          NavigationDestination(icon: Icon(Icons.history_edu_outlined), selectedIcon: Icon(Icons.history_edu), label: 'Registru'),
         ],
       ),
     );
@@ -87,15 +111,16 @@ class PendingAlertsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final alerts = context.watch<DataService>().pendingAlerts;
+    final brand = context.roeid;
 
     if (alerts.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.done_all, size: 100, color: AppTheme.primaryAction),
-            SizedBox(height: 16),
-            Text("Nu există alerte pendinte.", style: TextStyle(fontSize: 24)),
+            Icon(Icons.done_all, size: 72, color: brand.primary),
+            const SizedBox(height: 16),
+            Text('Nu există alerte pendinte.', style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
       );

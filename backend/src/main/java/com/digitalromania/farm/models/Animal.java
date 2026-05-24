@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import com.digitalromania.farm.config.AuditListener;
 import java.time.LocalDate;
+import java.io.Serializable;
 
 @Entity
 @Data
@@ -17,7 +18,9 @@ import java.time.LocalDate;
 @SQLDelete(sql = "UPDATE animal SET deleted = true WHERE id=?")
 @SQLRestriction("deleted=false")
 @EntityListeners(AuditListener.class)
-public class Animal {
+public class Animal implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,5 +41,5 @@ public class Animal {
     private String healthStatus;
     private Long ownerId;
 
-    private boolean deleted = false;
+    private Boolean deleted = false;
 }

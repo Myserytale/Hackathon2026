@@ -31,5 +31,5 @@ public class Document {
     private String documentUrl;
     private LocalDate uploadDate;
 
-    private boolean deleted = false;
+    private Boolean deleted = false;
 }
