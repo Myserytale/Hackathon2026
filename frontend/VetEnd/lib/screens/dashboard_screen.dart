@@ -45,6 +45,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         actions: [
+          if (_selectedIndex == 0)
+            IconButton(
+              onPressed: () => context.read<DataService>().loadData(),
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh Dosare",
+            ),
           IconButton(
             onPressed: () => context.read<AuthService>().logout(),
             icon: const Icon(Icons.logout),
@@ -95,12 +101,15 @@ class PendingAlertsView extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 32),
-      itemCount: alerts.length,
-      itemBuilder: (context, index) => ActionCard(
-        alert: alerts[index],
-        onReject: () => context.read<DataService>().rejectAlert(alerts[index].id),
+    return RefreshIndicator(
+      onRefresh: () => context.read<DataService>().loadData(),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 32),
+        itemCount: alerts.length,
+        itemBuilder: (context, index) => ActionCard(
+          alert: alerts[index],
+          onReject: () => context.read<DataService>().rejectAlert(alerts[index].id),
+        ),
       ),
     );
   }

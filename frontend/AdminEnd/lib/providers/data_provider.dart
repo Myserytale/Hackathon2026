@@ -18,9 +18,10 @@ class DataProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   void updateToken(String? token) {
+    if (_authToken == token) return;
     _authToken = token;
     if (token != null) {
-      loadInitialData();
+      Future.microtask(() => loadInitialData());
     }
   }
 
@@ -34,17 +35,13 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Fetch Applications
-      final appResponse = await http.get(Uri.parse('$baseUrl/funding'), headers: _headers);
+      final appResponse = await http.get(Uri.parse('$baseUrl/grant-dossiers/status/PENDING_APIA'), headers: _headers);
       if (appResponse.statusCode == 200) {
         final List<dynamic> data = jsonDecode(appResponse.body);
-        _applications = data.map((item) => _mapToApplication(item)).toList();
+        _applications = data.map((item) => Application.fromJson(item)).toList();
       }
 
-      // Fetch Audit Logs (simulated or if backend has it)
-      // Note: If backend doesn't have an audit endpoint yet, we keep mock logs for demo
       _auditLogs = _getMockAuditLogs();
-
     } catch (e) {
       debugPrint('Error loading data: $e');
     }
@@ -55,14 +52,14 @@ class DataProvider extends ChangeNotifier {
 
   Future<void> approveApplication(String id) async {
     try {
-      final response = await http.put(
-        Uri.parse('$baseUrl/funding/$id/status'),
+      final response = await http.post(
+        Uri.parse('$baseUrl/grant-dossiers/$id/apia-review'),
         headers: _headers,
-        body: 'APPROVED', // Backend expects a plain string body for status
+        body: jsonEncode({'action': 'APPROVE'}),
       );
 
       if (response.statusCode == 200) {
-        await loadInitialData(); // Refresh list
+        await loadInitialData();
       }
     } catch (e) {
       debugPrint('Error approving application: $e');
@@ -71,10 +68,10 @@ class DataProvider extends ChangeNotifier {
 
   Future<void> rejectApplication(String id, String reason) async {
     try {
-      final response = await http.put(
-        Uri.parse('$baseUrl/funding/$id/status'),
+      final response = await http.post(
+        Uri.parse('$baseUrl/grant-dossiers/$id/apia-review'),
         headers: _headers,
-        body: 'REJECTED',
+        body: jsonEncode({'action': 'REJECT'}),
       );
 
       if (response.statusCode == 200) {
@@ -82,32 +79,6 @@ class DataProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error rejecting application: $e');
-    }
-  }
-
-  Application _mapToApplication(Map<String, dynamic> json) {
-    return Application(
-      id: json['id'].toString(),
-      farmerName: json['farmerName'] ?? 'Fermier Necunoscut',
-      farmLocation: json['location'] ?? 'Nespecificat',
-      bovineCount: json['animalCount'] ?? 0,
-      requestedAmount: (json['requestedAmount'] as num?)?.toDouble() ?? 0.0,
-      submissionDate: json['submissionDate'] != null 
-          ? DateTime.parse(json['submissionDate']) 
-          : DateTime.now(),
-      status: _mapStatus(json['status']),
-      documents: (json['documents'] as List<dynamic>?)
-          ?.map((d) => d['fileName'].toString())
-          .toList() ?? [],
-    );
-  }
-
-  ApplicationStatus _mapStatus(String? status) {
-    switch (status?.toUpperCase()) {
-      case 'APPROVED': return ApplicationStatus.approved;
-      case 'REJECTED': return ApplicationStatus.rejected;
-      case 'PENDING': return ApplicationStatus.pending;
-      default: return ApplicationStatus.pending;
     }
   }
 

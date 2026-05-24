@@ -1,12 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 import 'animal_browsing_view.dart';
 import 'report_birth_view.dart';
 import 'funding_application_view.dart';
 import 'report_death_browsing_view.dart';
-import 'vet_portal_view.dart';
-import 'apia_portal_view.dart';
+import 'my_dossiers_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -64,34 +65,7 @@ class HomeView extends StatelessWidget {
               label: 'Contact the Vet',
               color: Colors.orange,
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Request Vet Visit'),
-                    content: const Text(
-                      'A notification will be sent to your assigned veterinarian (vet_ana) to schedule a farm visit.\n\nThis feature uses the SSE notification system.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Vet visit request sent successfully!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                        child: const Text('Send Request', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                );
+                _showVetSelectionDialog(context);
               },
             ),
             const SizedBox(height: 20),
@@ -107,39 +81,152 @@ class HomeView extends StatelessWidget {
                 );
               },
             ),
-                ),
             const SizedBox(height: 20),
-            const Divider(),
-            const Text('HACKATHON DEMO: Switch Portal', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const VetPortalView()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade800, foregroundColor: Colors.white),
-                    child: const Text('Vet Portal'),
+            _dashboardButton(
+              context,
+              icon: Icons.folder_shared,
+              label: 'My Grant Dossiers',
+              color: Colors.teal,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyDossiersView()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchVets(BuildContext context) async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final token = authService.token;
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/users/vets'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.cast<Map<String, dynamic>>();
+      }
+    } catch (e) {
+      debugPrint('Error fetching vets: $e');
+    }
+    return [];
+  }
+
+  void _showVetSelectionDialog(BuildContext context) async {
+    final vets = await _fetchVets(context);
+
+    if (!context.mounted) return;
+
+    if (vets.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No veterinarians found. Please try again later.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Map<String, dynamic>? selectedVet;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Request Vet Visit'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select a veterinarian to send your visit request to:',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<Map<String, dynamic>>(
+                decoration: InputDecoration(
+                  labelText: 'Veterinarian',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  prefixIcon: const Icon(Icons.person, color: Colors.orange),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ApiaPortalView()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade800, foregroundColor: Colors.white),
-                    child: const Text('APIA Portal'),
+                hint: const Text('Choose a vet...'),
+                isExpanded: true,
+                value: selectedVet,
+                items: vets.map((vet) {
+                  return DropdownMenuItem<Map<String, dynamic>>(
+                    value: vet,
+                    child: Text(
+                      vet['username'] ?? 'Unknown',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedVet = value;
+                  });
+                },
+              ),
+              if (selectedVet != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'A notification will be sent to ${selectedVet!['username']} to schedule a farm visit.',
+                          style: const TextStyle(fontSize: 13, color: Colors.black87),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: selectedVet == null
+                  ? null
+                  : () {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Vet visit request sent to ${selectedVet!['username']}!',
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                disabledBackgroundColor: Colors.grey[300],
+              ),
+              child: const Text('Send Request', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -234,11 +321,4 @@ class HomeView extends StatelessWidget {
       ),
     );
   }
-
-  void _showPlaceholder(BuildContext context, String title) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$title feature coming soon!')),
-    );
-  }
 }
-

@@ -32,15 +32,12 @@ class DataService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // For Vet Portal, "Alerts" can be mapped to Incidents or just mock for demo
-      // but let's try to fetch incidents from backend
-      final response = await http.get(Uri.parse('$baseUrl/incidents'), headers: _headers);
+      final response = await http.get(Uri.parse('$baseUrl/grant-dossiers/status/PENDING_VET'), headers: _headers);
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         _alerts = data.map((item) => _mapToAlert(item)).toList();
       } else {
-        // Fallback to mock if endpoint doesn't exist yet
-        _alerts = _getMockAlerts();
+        _alerts = [];
       }
       
       // Fetch audit logs if available
@@ -52,7 +49,7 @@ class DataService extends ChangeNotifier {
 
     } catch (e) {
       debugPrint('Error loading vet data: $e');
-      _alerts = _getMockAlerts();
+      _alerts = [];
     }
 
     _isLoading = false;
@@ -62,98 +59,107 @@ class DataService extends ChangeNotifier {
   List<Alert> get pendingAlerts => _alerts.where((a) => a.status == AlertStatus.pending).toList();
   List<AuditEntry> get auditTrail => _auditTrail.reversed.toList();
 
-  Future<void> validateAlert(String alertId) async {
-    // In a real integration, we might create a Consultation or update Incident status
-    // For demo, we'll simulate the backend call and update local state
-    
-    final index = _alerts.indexWhere((a) => a.id == alertId);
+  Future<void> validateAlert(String dossierId, String signatureBase64) async {
+    final index = _alerts.indexWhere((a) => a.dossierId == dossierId);
     if (index != -1) {
       final alert = _alerts[index];
       
       try {
-        // Mock a backend call to "process" this alert
-        await Future.delayed(const Duration(milliseconds: 500));
-        
-        _alerts[index] = Alert(
-          id: alert.id,
-          farmerName: alert.farmerName,
-          animalType: alert.animalType,
-          description: alert.description,
-          timestamp: alert.timestamp,
-          status: AlertStatus.validated,
+        final response = await http.post(
+          Uri.parse('$baseUrl/grant-dossiers/$dossierId/vet-review'),
+          headers: _headers,
+          body: jsonEncode({
+            'action': 'APPROVE',
+            'veterinarianId': 2, // Hardcoded for demo if not using real auth
+            'signatureBase64': signatureBase64,
+          }),
         );
         
-        // Add to audit trail (simulating blockchain/ledger record)
-        final newId = "A${_auditTrail.length + 1}";
-        final rawData = "$newId${alert.id}${DateTime.now().toIso8601String()}";
-        final hash = sha256.convert(utf8.encode(rawData)).toString();
-        
-        _auditTrail.add(AuditEntry(
-          id: newId,
-          action: "Validare: ${alert.animalType}",
-          timestamp: DateTime.now(),
-          entityId: "RO-${100000 + _auditTrail.length}",
-          hash: hash,
-        ));
-        
-        notifyListeners();
+        if (response.statusCode == 200) {
+          _alerts[index] = Alert(
+            id: alert.id,
+            dossierId: alert.dossierId,
+            farmerName: alert.farmerName,
+            animalType: alert.animalType,
+            animalTag: alert.animalTag,
+            description: alert.description,
+            farmerDocumentUrl: alert.farmerDocumentUrl,
+            timestamp: alert.timestamp,
+            status: AlertStatus.validated,
+          );
+          
+          final newId = "A${_auditTrail.length + 1}";
+          final rawData = "$newId${alert.id}${DateTime.now().toIso8601String()}";
+          final hash = sha256.convert(utf8.encode(rawData)).toString();
+          
+          _auditTrail.add(AuditEntry(
+            id: newId,
+            action: "Aprobare Dosar Grant SCZ: ${alert.animalTag}",
+            timestamp: DateTime.now(),
+            entityId: "RO-${100000 + _auditTrail.length}",
+            hash: hash,
+          ));
+          
+          notifyListeners();
+        }
       } catch (e) {
         debugPrint('Error validating alert: $e');
       }
     }
   }
 
-  void rejectAlert(String alertId) {
-    final index = _alerts.indexWhere((a) => a.id == alertId);
+  Future<void> rejectAlert(String dossierId) async {
+    final index = _alerts.indexWhere((a) => a.dossierId == dossierId);
     if (index != -1) {
       final alert = _alerts[index];
-      _alerts[index] = Alert(
-        id: alert.id,
-        farmerName: alert.farmerName,
-        animalType: alert.animalType,
-        description: alert.description,
-        timestamp: alert.timestamp,
-        status: AlertStatus.rejected,
-      );
-      notifyListeners();
+      try {
+        final response = await http.post(
+          Uri.parse('$baseUrl/grant-dossiers/$dossierId/vet-review'),
+          headers: _headers,
+          body: jsonEncode({
+            'action': 'REJECT',
+            'veterinarianId': 2,
+          }),
+        );
+        if (response.statusCode == 200) {
+          _alerts[index] = Alert(
+            id: alert.id,
+            dossierId: alert.dossierId,
+            farmerName: alert.farmerName,
+            animalType: alert.animalType,
+            animalTag: alert.animalTag,
+            description: alert.description,
+            farmerDocumentUrl: alert.farmerDocumentUrl,
+            timestamp: alert.timestamp,
+            status: AlertStatus.rejected,
+          );
+          notifyListeners();
+        }
+      } catch (e) {
+        debugPrint('Error rejecting alert: $e');
+      }
     }
   }
 
   Alert _mapToAlert(Map<String, dynamic> json) {
     return Alert(
       id: json['id'].toString(),
-      farmerName: "Fermier ID: ${json['farmerId']}",
-      animalType: json['type'] ?? 'Animal',
-      description: json['description'] ?? 'Fără descriere',
-      timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : DateTime.now(),
+      dossierId: json['id'].toString(),
+      farmerName: json['farmer'] != null ? json['farmer']['username'] : "Fermier Necunoscut",
+      animalType: "Cerere Grant SCZ (Vițel Nou-născut)",
+      animalTag: json['animal'] != null ? json['animal']['tagNumber'] : "N/A",
+      description: "Dosar de Grant pentru animalul ${json['animal'] != null ? json['animal']['tagNumber'] : 'N/A'}",
+      farmerDocumentUrl: json['farmerDocumentUrl'],
+      timestamp: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       status: _mapStatus(json['status']),
     );
   }
 
   AlertStatus _mapStatus(String? status) {
     switch (status?.toUpperCase()) {
-      case 'VALIDATED': return AlertStatus.validated;
-      case 'REJECTED': return AlertStatus.rejected;
+      case 'PENDING_APIA': return AlertStatus.validated;
+      case 'RETURNED_TO_FARMER': return AlertStatus.rejected;
       default: return AlertStatus.pending;
     }
-  }
-
-  List<Alert> _getMockAlerts() {
-    return [
-      Alert(
-        id: "1",
-        farmerName: "Fermier Sandu",
-        animalType: "Vițel (Nou-născut)",
-        description: "Raportat naștere vițel la ferma din satul Bontida.",
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      Alert(
-        id: "2",
-        farmerName: "Maria Popescu",
-        animalType: "Ovine",
-        description: "Transfer de 10 ovine către abatorul autorizat local.",
-        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-    ];
   }
 }

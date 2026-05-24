@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import '../models/application.dart';
 import '../providers/data_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FileReviewWizard extends StatelessWidget {
   final Application application;
@@ -89,9 +90,18 @@ class FileReviewWizard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        ...application.documents.map(
-                          (doc) => _DocumentItem(name: doc),
-                        ),
+                        if (application.farmerDocumentUrl != null)
+                          _DocumentItem(
+                            name: 'Cerere_Grant_APIA.pdf',
+                            docType: 'farmer',
+                            applicationId: application.id,
+                          ),
+                        if (application.vetDocumentUrl != null)
+                          _DocumentItem(
+                            name: 'Formular_F1_Veterinar.pdf',
+                            docType: 'vet',
+                            applicationId: application.id,
+                          ),
                       ],
                     ),
                   ),
@@ -235,8 +245,10 @@ class _InfoRow extends StatelessWidget {
 
 class _DocumentItem extends StatelessWidget {
   final String name;
+  final String docType;
+  final String applicationId;
 
-  const _DocumentItem({required this.name});
+  const _DocumentItem({required this.name, required this.docType, required this.applicationId});
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +271,17 @@ class _DocumentItem extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(Icons.remove_red_eye, size: 16, color: Color(0xFF1976D2)),
+          IconButton(
+            icon: const Icon(Icons.download, size: 20, color: Color(0xFF1976D2)),
+            onPressed: () async {
+              final url = Uri.parse('http://localhost:8080/api/grant-dossiers/$applicationId/download/$docType');
+              try {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } catch (e) {
+                debugPrint('Could not launch URL: $e');
+              }
+            },
+          ),
         ],
       ),
     );
