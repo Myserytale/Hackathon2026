@@ -34,7 +34,7 @@ We use **HTTPS** for realism and to ensure modern web features (like geolocation
 
 ### Portal Links
 Once you accept the certificate, you will see the Digital Romania Landing Page. From there, you can navigate to:
-- 🚜 **Farmer Portal**: `https://localhost/farmer/`
+- 🚜 **Farmer Portal**: `https://localost/farmer/`
 - 🩺 **Veterinary Portal**: `https://localhost/vet/`
 - 🏛️ **Admin/APIA Portal**: `https://localhost/admin/`
 
