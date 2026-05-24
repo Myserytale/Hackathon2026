@@ -79,6 +79,8 @@ public class GrantDossierController {
             dossier.setFarmerDocumentUrl(farmerDocumentUrl);
         }
 
+        dossier.setFarmName(farmName);
+        dossier.setAnimalTag(animalTag);
         dossier.setUpdatedAt(LocalDateTime.now());
         
         if (isDraft) {

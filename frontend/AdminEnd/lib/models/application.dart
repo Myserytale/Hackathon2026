@@ -34,7 +34,7 @@ class Application {
 
     return Application(
       id: json['id'].toString(),
-      farmerName: json['farmer']?['username'] ?? 'Fermier Necunoscut',
+      farmerName: json['farmName'] ?? (json['farmer']?['username'] ?? 'Fermier Necunoscut'),
       farmLocation: json['farmer']?['location'] ?? 'Locație Necunoscută',
       bovineCount: 1,
       requestedAmount: 400.0,
@@ -42,7 +42,7 @@ class Application {
       status: parsedStatus,
       farmerDocumentUrl: json['farmerDocumentUrl'],
       vetDocumentUrl: json['vetDocumentUrl'],
-      animalTag: json['animal']?['tagNumber'] ?? 'N/A',
+      animalTag: json['animalTag'] ?? (json['animal']?['tagNumber'] ?? 'N/A'),
     );
   }
 }

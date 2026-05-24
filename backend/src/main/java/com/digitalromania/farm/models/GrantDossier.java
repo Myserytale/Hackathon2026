@@ -41,6 +41,12 @@ public class GrantDossier {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "farm_name")
+    private String farmName;
+
+    @Column(name = "animal_tag")
+    private String animalTag;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -68,4 +74,10 @@ public class GrantDossier {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getFarmName() { return farmName; }
+    public void setFarmName(String farmName) { this.farmName = farmName; }
+
+    public String getAnimalTag() { return animalTag; }
+    public void setAnimalTag(String animalTag) { this.animalTag = animalTag; }
 }

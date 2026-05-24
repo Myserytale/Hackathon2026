@@ -8,6 +8,7 @@ import '../services/auth_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
 import '../config/api_config.dart';
+import '../viewmodels/animal_viewmodel.dart';
 
 class FundingApplicationView extends StatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -404,15 +405,34 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
               title: const Text('Date Vițel (Naștere)'),
               content: Column(
                 children: [
-                  TextFormField(
-                    initialValue: _animalTag,
-                    decoration: const InputDecoration(
-                      labelText: 'Crotalia Mamei (ex. RO123456)',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.qr_code_scanner),
-                    ),
-                    validator: (value) => value!.isEmpty ? 'Necesar' : null,
-                    onSaved: (val) => _animalTag = val!,
+                  Autocomplete<String>(
+                    initialValue: TextEditingValue(text: _animalTag),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      final animalVM = context.read<AnimalViewModel>();
+                      final tags = animalVM.animals.map((a) => a.tagNumber).toList();
+                      if (textEditingValue.text.isEmpty) {
+                        return tags;
+                      }
+                      return tags.where((String option) {
+                        return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selection) {
+                      _animalTag = selection;
+                    },
+                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Crotalia Mamei (ex. RO123456)',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.qr_code_scanner),
+                        ),
+                        validator: (value) => value!.isEmpty ? 'Necesar' : null,
+                        onSaved: (val) => _animalTag = val!,
+                      );
+                    },
                   ),
                   const SizedBox(height: 10),
                   const Text(

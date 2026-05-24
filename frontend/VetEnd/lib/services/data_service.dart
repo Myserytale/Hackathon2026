@@ -146,10 +146,10 @@ class DataService extends ChangeNotifier {
     return Alert(
       id: json['id'].toString(),
       dossierId: json['id'].toString(),
-      farmerName: json['farmer'] != null ? json['farmer']['username'] : "Fermier Necunoscut",
+      farmerName: json['farmName'] ?? (json['farmer'] != null ? json['farmer']['username'] : "Fermier Necunoscut"),
       animalType: "Cerere Grant SCZ (Vițel Nou-născut)",
-      animalTag: json['animal'] != null ? json['animal']['tagNumber'] : "N/A",
-      description: "Dosar de Grant pentru animalul ${json['animal'] != null ? json['animal']['tagNumber'] : 'N/A'}",
+      animalTag: json['animalTag'] ?? (json['animal'] != null ? json['animal']['tagNumber'] : "N/A"),
+      description: "Dosar de Grant pentru animalul ${json['animalTag'] ?? (json['animal'] != null ? json['animal']['tagNumber'] : 'N/A')}",
       farmerDocumentUrl: json['farmerDocumentUrl'],
       timestamp: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       status: _mapStatus(json['status']),
