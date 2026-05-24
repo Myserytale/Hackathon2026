@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../services/auth_service.dart';
 import '../theme/roeid_theme.dart';
 import '../widgets/roeid_ui.dart';
@@ -77,32 +81,7 @@ class HomeView extends StatelessWidget {
             icon: Icons.medical_services_outlined,
             label: 'Contact the Vet',
             accent: const Color(0xFF1565C0),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Request Vet Visit'),
-                  content: const Text(
-                    'A notification will be sent to your assigned veterinarian to schedule a farm visit.',
-                  ),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Vet visit request sent successfully!'),
-                            backgroundColor: RoeidTheme.success,
-                          ),
-                        );
-                      },
-                      child: const Text('Send Request'),
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _showVetRequestDialog(context),
           ),
           const SizedBox(height: 16),
           RoeidActionTile(
@@ -119,6 +98,70 @@ class HomeView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showVetRequestDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Request Vet Visit'),
+        content: const Text(
+          'A notification will be sent to your assigned veterinarian to schedule a farm visit.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _sendVetRequest(context);
+            },
+            child: const Text('Send Request'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendVetRequest(BuildContext context) async {
+    try {
+      final authService = context.read<AuthService>();
+      final response = await http.post(
+        Uri.parse('${ApiConfig.apiBaseUrl}/incidents'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (authService.token != null) 'Authorization': 'Bearer ${authService.token}',
+        },
+        body: jsonEncode({
+          'type': 'Vet Request',
+          'description': 'The farmer has requested a vet visit.',
+          'location': 'Farm Headquarters',
+          'status': 'PENDING',
+          'reportedAt': DateTime.now().toIso8601String(),
+        }),
+      );
+
+      if (!context.mounted) return;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vet visit request sent to the Vet Portal!'),
+            backgroundColor: RoeidTheme.success,
+          ),
+        );
+      } else {
+        throw Exception('Failed to send request');
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not reach backend. Please try again later.'),
+            backgroundColor: RoeidTheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showReportActionDialog(BuildContext context) {
