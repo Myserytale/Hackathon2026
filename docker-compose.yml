@@ -40,6 +40,8 @@ services:
   # ── Local email catcher (2FA codes) — open http://localhost:8025 ──
   mailpit:
     image: axllent/mailpit:latest
+    environment:
+      - MP_WEBROOT=/mail/
     ports:
       - "8025:8025"
       - "1025:1025"
