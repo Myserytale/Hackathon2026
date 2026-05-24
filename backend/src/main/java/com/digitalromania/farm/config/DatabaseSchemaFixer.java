@@ -22,6 +22,10 @@ public class DatabaseSchemaFixer implements CommandLineRunner {
                 ALTER TABLE users ADD CONSTRAINT users_role_check
                 CHECK (role IN ('FARMER', 'VET', 'ADMIN', 'SYSTEM'))
                 """);
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(255)");
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255)");
+            jdbcTemplate.execute("UPDATE users SET name = username WHERE name IS NULL");
+            jdbcTemplate.execute("UPDATE users SET email = username || '@demo.roeid.local' WHERE email IS NULL");
         } catch (Exception e) {
             System.err.println("Could not update users role constraint: " + e.getMessage());
         }

@@ -24,7 +24,12 @@ class AuthService extends ChangeNotifier {
     return 'Request failed (${response.statusCode})';
   }
 
-  Future<bool> register(String username, String password) async {
+  Future<bool> register({
+    required String username,
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     _errorMessage = null;
     try {
       final response = await http.post(
@@ -32,6 +37,8 @@ class AuthService extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
+          'name': name,
+          'email': email.trim().toLowerCase(),
           'password': password,
           'role': 'VET',
         }),
@@ -48,14 +55,14 @@ class AuthService extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String email, String password) async {
     _errorMessage = null;
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'username': username,
+          'email': email.trim().toLowerCase(),
           'password': password,
           'expectedRole': 'VET',
         }),
@@ -92,15 +99,11 @@ class AuthService extends ChangeNotifier {
         notifyListeners();
         return true;
       }
+      _errorMessage = _parseError(response);
     } catch (e) {
       debugPrint('OTP verify error: $e');
     }
     return false;
-  }
-
-  Future<void> magicLogin() async {
-    await login('vet_ana', 'vet123');
-    await verifyOtp('123456');
   }
 
   void logout() {

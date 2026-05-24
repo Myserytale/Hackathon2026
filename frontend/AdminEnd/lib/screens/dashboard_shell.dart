@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 // import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../theme/roeid_theme.dart';
+import '../widgets/roeid_ui.dart';
 
 class DashboardShell extends StatelessWidget {
   final Widget child;
@@ -48,6 +50,7 @@ class DashboardShell extends StatelessWidget {
                 const TopHeader(),
                 Expanded(
                   child: Container(
+                    color: RoeidTheme.background,
                     padding: const EdgeInsets.all(24),
                     child: child,
                   ),
@@ -67,25 +70,54 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
+    final brand = context.roeid.config;
 
     return Container(
       width: 280,
-      color: Theme.of(context).primaryColor,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [brand.primaryDark, brand.primary],
+        ),
+      ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(32),
-            child: const Row(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.account_balance, color: Colors.white, size: 28),
-                SizedBox(width: 12),
-                Text(
-                  'APIA Portal',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const Row(
+                  children: [
+                    Icon(Icons.verified_user_rounded, color: Colors.white70, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      'ROeID',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Icon(brand.icon, color: Colors.white, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        brand.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -167,55 +199,45 @@ class TopHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final brand = context.roeid.config;
 
     return Container(
-      height: 70,
+      height: 72,
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+        color: RoeidTheme.surface,
+        border: Border(bottom: BorderSide(color: RoeidTheme.border)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          const Text(
-            'Administrație Centrală APIA',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            width: 8,
+            height: 28,
             decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
+              color: brand.primary,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: const Text(
-              'Regiunea: NORD-VEST (CLUJ)',
-              style: TextStyle(
-                color: Color(0xFF1976D2),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
           ),
-          const SizedBox(width: 24),
+          const SizedBox(width: 12),
+          Text(
+            'Administrație Centrală APIA',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const Spacer(),
+          RoeidStatusBadge(label: 'Regiunea: NORD-VEST'),
+          const SizedBox(width: 20),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                user?.name ?? 'Utilizator',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                user?.role ?? 'Specialist',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
+              Text(user?.name ?? 'Utilizator', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(user?.role ?? 'Specialist', style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
           const SizedBox(width: 12),
-          const CircleAvatar(
-            backgroundColor: Color(0xFFEEEEEE),
-            child: Icon(Icons.person, size: 20, color: Colors.grey),
+          CircleAvatar(
+            backgroundColor: brand.primary.withValues(alpha: 0.12),
+            child: Icon(Icons.person, size: 20, color: brand.primaryDark),
           ),
         ],
       ),

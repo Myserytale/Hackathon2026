@@ -37,6 +37,14 @@ services:
       - "8083:80"
     restart: always
 
+  # ── Local email catcher (2FA codes) — open http://localhost:8025 ──
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    restart: always
+
   backend:
     build:
       context: ./backend
@@ -48,11 +56,20 @@ services:
       - SPRING_DATASOURCE_PASSWORD=farmpassword
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_REDIS_HOST=redis
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST:-mailpit}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT:-1025}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME:-}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD:-}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=${SPRING_MAIL_SMTP_AUTH:-false}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=${SPRING_MAIL_STARTTLS:-false}
+      - MAIL_FROM=${MAIL_FROM:-ROeID <noreply@roeid.ro>}
     restart: always
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_started
+      mailpit:
         condition: service_started
 
   redis:

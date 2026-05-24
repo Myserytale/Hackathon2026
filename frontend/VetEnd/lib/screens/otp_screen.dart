@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/roeid_theme.dart';
+import '../widgets/roeid_ui.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -16,55 +17,57 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.security, size: 80, color: AppTheme.accentBlue),
-              const SizedBox(height: 24),
-              Text("Verificare 2FA", style: Theme.of(context).textTheme.displayLarge),
-              const SizedBox(height: 16),
-              const Text(
-                "Introduceți codul primit prin SMS sau Token",
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              Pinput(
-                length: 6,
-                defaultPinTheme: PinTheme(
-                  width: 60,
-                  height: 70,
-                  textStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppTheme.charcoal, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onCompleted: (pin) async {
-                  setState(() => _isLoading = true);
-                  final auth = context.read<AuthService>();
-                  final success = await auth.verifyOtp(pin);
-                  if (!context.mounted) return;
-                  setState(() => _isLoading = false);
-                  if (success) {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Cod incorect")),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 48),
-              if (_isLoading) const CircularProgressIndicator(color: AppTheme.accentBlue),
-            ],
+    final brand = context.roeid.config;
+    final pinTheme = PinTheme(
+      width: 52,
+      height: 58,
+      textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      decoration: BoxDecoration(
+        border: Border.all(color: RoeidTheme.border, width: 1.5),
+        borderRadius: BorderRadius.circular(RoeidTheme.radiusInput),
+      ),
+    );
+
+    return RoeidAuthLayout(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Icon(Icons.security_rounded, size: 48, color: brand.primary),
+          const SizedBox(height: 16),
+          Text('Verificare 2FA', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(
+            'Introduceți codul de 6 cifre trimis pe adresa dvs. de email.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
           ),
-        ),
+          const SizedBox(height: 32),
+          Pinput(
+            length: 6,
+            defaultPinTheme: pinTheme,
+            focusedPinTheme: pinTheme.copyWith(
+              decoration: pinTheme.decoration!.copyWith(
+                border: Border.all(color: brand.primary, width: 2),
+              ),
+            ),
+            onCompleted: (pin) async {
+              setState(() => _isLoading = true);
+              final auth = context.read<AuthService>();
+              final success = await auth.verifyOtp(pin);
+              if (!context.mounted) return;
+              setState(() => _isLoading = false);
+              if (success) {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Cod incorect'), backgroundColor: RoeidTheme.error),
+                );
+              }
+            },
+          ),
+          const SizedBox(height: 32),
+          if (_isLoading) Center(child: CircularProgressIndicator(color: brand.primary)),
+        ],
       ),
     );
   }

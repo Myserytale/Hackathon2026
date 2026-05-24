@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'theme/roeid_theme.dart';
 import 'viewmodels/animal_viewmodel.dart';
 import 'services/auth_service.dart';
 import 'views/home_view.dart';
@@ -35,10 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Farmer Animal Manager',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
+      theme: RoeidTheme.light(),
       home: Consumer<AuthService>(
         builder: (context, authService, _) {
           return authService.isAuthenticated ? const HomeView() : const LoginView();

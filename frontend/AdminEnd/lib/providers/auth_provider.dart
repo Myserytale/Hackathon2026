@@ -25,7 +25,12 @@ class AuthProvider extends ChangeNotifier {
     return 'Request failed (${response.statusCode})';
   }
 
-  Future<bool> register(String username, String password) async {
+  Future<bool> register({
+    required String username,
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     _errorMessage = null;
     try {
       final response = await http.post(
@@ -33,6 +38,8 @@ class AuthProvider extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
+          'name': name,
+          'email': email.trim().toLowerCase(),
           'password': password,
           'role': 'ADMIN',
         }),
@@ -49,15 +56,14 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
-  // Step 1: Login with credentials
-  Future<bool> initiateLogin(String username, String password) async {
+  Future<bool> initiateLogin(String email, String password) async {
     _errorMessage = null;
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'username': username,
+          'email': email.trim().toLowerCase(),
           'password': password,
           'expectedRole': 'ADMIN',
         }),
@@ -65,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _tempToken = data['token']; // This is the temporary 2FA token
+        _tempToken = data['token'];
         notifyListeners();
         return true;
       }
@@ -77,7 +83,6 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
-  // Step 2: Verify 2FA code
   Future<bool> verify2Fa(String code) async {
     if (_tempToken == null) return false;
 
@@ -92,7 +97,6 @@ class AuthProvider extends ChangeNotifier {
         final data = jsonDecode(response.body);
         final finalToken = data['token'];
         
-        // Extract basic info from token (or just mock it since we know the user)
         _user = AdminUser(
           id: 'ADM-001',
           name: 'Administrator Sistem',
@@ -105,15 +109,11 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       }
+      _errorMessage = _parseError(response);
     } catch (e) {
       debugPrint('2FA verification error: $e');
     }
     return false;
-  }
-
-  Future<void> magicLogin() async {
-    await initiateLogin('admin_maria', 'admin123');
-    await verify2Fa('123456');
   }
 
   void logout() {
