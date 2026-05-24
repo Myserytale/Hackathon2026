@@ -146,6 +146,15 @@ class _MyDossiersViewState extends State<MyDossiersView> {
         icon = Icons.pending;
         break;
       case 'DRAFT_FERMIER':
+        color = Colors.grey;
+        label = 'Draft (Netrimis)';
+        icon = Icons.drafts;
+        break;
+      case 'APPROVED':
+        color = Colors.green;
+        label = 'Aprobat de APIA';
+        icon = Icons.check_circle;
+        break;
       default:
         color = Colors.grey;
         label = 'Draft (Netrimis)';
