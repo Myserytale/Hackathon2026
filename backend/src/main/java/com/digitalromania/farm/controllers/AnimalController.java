@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import com.digitalromania.farm.repositories.UserRepository;
+import com.digitalromania.farm.repositories.IncidentRepository;
 import com.digitalromania.farm.models.User;
 import com.digitalromania.farm.models.Role;
+import com.digitalromania.farm.models.Incident;
+import java.time.LocalDateTime;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,6 +32,9 @@ public class AnimalController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private IncidentRepository incidentRepository;
 
     @GetMapping
     @Operation(summary = "Get all animals", description = "Fetches all animals accessible to the current user (Farmers see their own, Admin/Vet see all).")
@@ -111,12 +117,25 @@ public class AnimalController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete an animal", description = "Removes an animal from the registry.")
+    @Operation(summary = "Report Animal Death", description = "Marks an animal as dead, removes it from active registry, and notifies the vet.")
     @CacheEvict(value = "animals", allEntries = true)
     public ResponseEntity<?> deleteAnimal(@PathVariable Long id) {
         return animalRepository.findById(id)
                 .map(animal -> {
-                    animalRepository.delete(animal);
+                    // Manually soft delete to ensure it works
+                    animal.setDeleted(true);
+                    animal.setHealthStatus("DEAD");
+                    animalRepository.save(animal);
+                    
+                    // Create an Incident so the Vet receives a notification
+                    Incident incident = new Incident();
+                    incident.setType("Death");
+                    incident.setDescription("Farmer reported the death of animal with Tag: " + animal.getTagNumber());
+                    incident.setAnimalId(animal.getId());
+                    incident.setReportedAt(LocalDateTime.now());
+                    incident.setStatus("PENDING_VET");
+                    incidentRepository.save(incident);
+                    
                     return ResponseEntity.ok().build();
                 })
                 .orElse(ResponseEntity.notFound().build());

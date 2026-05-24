@@ -41,6 +41,13 @@ class DataService extends ChangeNotifier {
         _alerts = [];
       }
       
+      // Fetch incidents
+      final incidentResponse = await http.get(Uri.parse('$baseUrl/incidents/status/PENDING_VET'), headers: _headers);
+      if (incidentResponse.statusCode == 200) {
+        final List<dynamic> incidentData = jsonDecode(incidentResponse.body);
+        _alerts.addAll(incidentData.map((item) => _mapIncidentToAlert(item)));
+      }
+      
       // Fetch audit logs if available
       final auditResponse = await http.get(Uri.parse('$baseUrl/audit'), headers: _headers);
       if (auditResponse.statusCode == 200) {
@@ -66,42 +73,30 @@ class DataService extends ChangeNotifier {
       final alert = _alerts[index];
       
       try {
-        final response = await http.post(
-          Uri.parse('$baseUrl/grant-dossiers/$dossierId/vet-review'),
-          headers: _headers,
-          body: jsonEncode({
-            'action': 'APPROVE',
-            'veterinarianId': 2, // Hardcoded for demo if not using real auth
-            'signatureBase64': signatureBase64,
-          }),
-        );
-        
-        if (response.statusCode == 200) {
-          _alerts[index] = Alert(
-            id: alert.id,
-            dossierId: alert.dossierId,
-            farmerName: alert.farmerName,
-            animalType: alert.animalType,
-            animalTag: alert.animalTag,
-            description: alert.description,
-            farmerDocumentUrl: alert.farmerDocumentUrl,
-            timestamp: alert.timestamp,
-            status: AlertStatus.validated,
+        if (dossierId.startsWith("inc_")) {
+          final incId = dossierId.substring(4);
+          final response = await http.put(
+            Uri.parse('$baseUrl/incidents/$incId/status'),
+            headers: _headers,
+            body: "RESOLVED",
+          );
+          if (response.statusCode == 200) {
+            _updateAlertSuccess(index, alert, "Aprobare Raportare: ${alert.animalTag}");
+          }
+        } else {
+          final response = await http.post(
+            Uri.parse('$baseUrl/grant-dossiers/$dossierId/vet-review'),
+            headers: _headers,
+            body: jsonEncode({
+              'action': 'APPROVE',
+              'veterinarianId': 2, // Hardcoded for demo if not using real auth
+              'signatureBase64': signatureBase64,
+            }),
           );
           
-          final newId = "A${_auditTrail.length + 1}";
-          final rawData = "$newId${alert.id}${DateTime.now().toIso8601String()}";
-          final hash = sha256.convert(utf8.encode(rawData)).toString();
-          
-          _auditTrail.add(AuditEntry(
-            id: newId,
-            action: "Aprobare Dosar Grant SCZ: ${alert.animalTag}",
-            timestamp: DateTime.now(),
-            entityId: "RO-${100000 + _auditTrail.length}",
-            hash: hash,
-          ));
-          
-          notifyListeners();
+          if (response.statusCode == 200) {
+            _updateAlertSuccess(index, alert, "Aprobare Dosar Grant SCZ: ${alert.animalTag}");
+          }
         }
       } catch (e) {
         debugPrint('Error validating alert: $e');
@@ -109,37 +104,81 @@ class DataService extends ChangeNotifier {
     }
   }
 
+  void _updateAlertSuccess(int index, Alert alert, String actionText) {
+    _alerts[index] = Alert(
+      id: alert.id,
+      dossierId: alert.dossierId,
+      farmerName: alert.farmerName,
+      animalType: alert.animalType,
+      animalTag: alert.animalTag,
+      description: alert.description,
+      farmerDocumentUrl: alert.farmerDocumentUrl,
+      timestamp: alert.timestamp,
+      status: AlertStatus.validated,
+    );
+    
+    final newId = "A${_auditTrail.length + 1}";
+    final rawData = "$newId${alert.id}${DateTime.now().toIso8601String()}";
+    final hash = sha256.convert(utf8.encode(rawData)).toString();
+    
+    _auditTrail.add(AuditEntry(
+      id: newId,
+      action: actionText,
+      timestamp: DateTime.now(),
+      entityId: "RO-${100000 + _auditTrail.length}",
+      hash: hash,
+    ));
+    
+    notifyListeners();
+  }
+
   Future<void> rejectAlert(String dossierId) async {
     final index = _alerts.indexWhere((a) => a.dossierId == dossierId);
     if (index != -1) {
       final alert = _alerts[index];
       try {
-        final response = await http.post(
-          Uri.parse('$baseUrl/grant-dossiers/$dossierId/vet-review'),
-          headers: _headers,
-          body: jsonEncode({
-            'action': 'REJECT',
-            'veterinarianId': 2,
-          }),
-        );
-        if (response.statusCode == 200) {
-          _alerts[index] = Alert(
-            id: alert.id,
-            dossierId: alert.dossierId,
-            farmerName: alert.farmerName,
-            animalType: alert.animalType,
-            animalTag: alert.animalTag,
-            description: alert.description,
-            farmerDocumentUrl: alert.farmerDocumentUrl,
-            timestamp: alert.timestamp,
-            status: AlertStatus.rejected,
+        if (dossierId.startsWith("inc_")) {
+          final incId = dossierId.substring(4);
+          final response = await http.put(
+            Uri.parse('$baseUrl/incidents/$incId/status'),
+            headers: _headers,
+            body: "REJECTED",
           );
-          notifyListeners();
+          if (response.statusCode == 200) {
+            _updateAlertReject(index, alert);
+          }
+        } else {
+          final response = await http.post(
+            Uri.parse('$baseUrl/grant-dossiers/$dossierId/vet-review'),
+            headers: _headers,
+            body: jsonEncode({
+              'action': 'REJECT',
+              'veterinarianId': 2,
+            }),
+          );
+          if (response.statusCode == 200) {
+            _updateAlertReject(index, alert);
+          }
         }
       } catch (e) {
         debugPrint('Error rejecting alert: $e');
       }
     }
+  }
+
+  void _updateAlertReject(int index, Alert alert) {
+    _alerts[index] = Alert(
+      id: alert.id,
+      dossierId: alert.dossierId,
+      farmerName: alert.farmerName,
+      animalType: alert.animalType,
+      animalTag: alert.animalTag,
+      description: alert.description,
+      farmerDocumentUrl: alert.farmerDocumentUrl,
+      timestamp: alert.timestamp,
+      status: AlertStatus.rejected,
+    );
+    notifyListeners();
   }
 
   Alert _mapToAlert(Map<String, dynamic> json) {
@@ -152,6 +191,20 @@ class DataService extends ChangeNotifier {
       description: "Dosar de Grant pentru animalul ${json['animal'] != null ? json['animal']['tagNumber'] : 'N/A'}",
       farmerDocumentUrl: json['farmerDocumentUrl'],
       timestamp: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      status: _mapStatus(json['status']),
+    );
+  }
+
+  Alert _mapIncidentToAlert(Map<String, dynamic> json) {
+    return Alert(
+      id: "inc_${json['id']}",
+      dossierId: "inc_${json['id']}",
+      farmerName: "Fermier (Raportare)", 
+      animalType: "Incident: ${json['type']}",
+      animalTag: json['description']?.contains("Tag:") == true ? json['description'].split("Tag: ").last : "N/A",
+      description: json['description'] ?? "Incident raportat",
+      farmerDocumentUrl: null,
+      timestamp: json['reportedAt'] != null ? DateTime.parse(json['reportedAt']) : DateTime.now(),
       status: _mapStatus(json['status']),
     );
   }
