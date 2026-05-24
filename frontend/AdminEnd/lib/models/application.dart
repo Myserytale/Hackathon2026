@@ -10,6 +10,7 @@ class Application {
   final ApplicationStatus status;
   final String? farmerDocumentUrl;
   final String? vetDocumentUrl;
+  final String animalTag;
 
   Application({
     required this.id,
@@ -21,6 +22,7 @@ class Application {
     required this.status,
     this.farmerDocumentUrl,
     this.vetDocumentUrl,
+    required this.animalTag,
   });
 
   factory Application.fromJson(Map<String, dynamic> json) {
@@ -33,13 +35,14 @@ class Application {
     return Application(
       id: json['id'].toString(),
       farmerName: json['farmer']?['username'] ?? 'Fermier Necunoscut',
-      farmLocation: 'Crotalie: ${json['animal']?['tagNumber'] ?? 'N/A'}',
+      farmLocation: json['farmer']?['location'] ?? 'Locație Necunoscută',
       bovineCount: 1,
       requestedAmount: 400.0,
       submissionDate: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       status: parsedStatus,
       farmerDocumentUrl: json['farmerDocumentUrl'],
       vetDocumentUrl: json['vetDocumentUrl'],
+      animalTag: json['animal']?['tagNumber'] ?? 'N/A',
     );
   }
 }

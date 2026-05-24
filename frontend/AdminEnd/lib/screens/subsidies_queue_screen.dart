@@ -91,101 +91,107 @@ class SubsidiesQueueScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: data.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      child: DataTable(
-                        columnSpacing: 24,
-                        headingRowColor: WidgetStateProperty.all(
-                          const Color(0xFFF9FAFB),
+                  : RefreshIndicator(
+                      onRefresh: () async {
+                        await data.loadInitialData();
+                      },
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: DataTable(
+                          columnSpacing: 24,
+                          headingRowColor: WidgetStateProperty.all(
+                            const Color(0xFFF9FAFB),
+                          ),
+                          columns: const [
+                            DataColumn(
+                              label: Text(
+                                'ID Dosar',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Fermier',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Locație',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Bovine',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Suma Cerută',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Status',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Acțiuni',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                          rows: data.applications.map((app) {
+                            return DataRow(
+                              cells: [
+                                DataCell(
+                                  Text(
+                                    app.id,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                DataCell(Text(app.farmerName)),
+                                DataCell(Text(app.farmLocation)),
+                                DataCell(Text(app.bovineCount.toString())),
+                                DataCell(
+                                  Text(
+                                    currencyFormat.format(app.requestedAmount),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataCell(_StatusBadge(status: app.status)),
+                                DataCell(
+                                  app.status == ApplicationStatus.pending
+                                      ? TextButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  FileReviewWizard(
+                                                    application: app,
+                                                  ),
+                                            );
+                                          },
+                                          child: const Text('Review Dosar'),
+                                        )
+                                      : const Icon(
+                                          Icons.check,
+                                          color: Colors.green,
+                                        ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
                         ),
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'ID Dosar',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Fermier',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Locație',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Bovine',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Suma Cerută',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Status',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Acțiuni',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                        rows: data.applications.map((app) {
-                          return DataRow(
-                            cells: [
-                              DataCell(
-                                Text(
-                                  app.id,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              DataCell(Text(app.farmerName)),
-                              DataCell(Text(app.farmLocation)),
-                              DataCell(Text(app.bovineCount.toString())),
-                              DataCell(
-                                Text(
-                                  currencyFormat.format(app.requestedAmount),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              DataCell(_StatusBadge(status: app.status)),
-                              DataCell(
-                                app.status == ApplicationStatus.pending
-                                    ? TextButton(
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) =>
-                                                FileReviewWizard(
-                                                  application: app,
-                                                ),
-                                          );
-                                        },
-                                        child: const Text('Review Dosar'),
-                                      )
-                                    : const Icon(
-                                        Icons.check,
-                                        color: Colors.green,
-                                      ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
                       ),
                     ),
             ),

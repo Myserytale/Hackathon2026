@@ -67,8 +67,8 @@ class FileReviewWizard extends StatelessWidget {
                           value: application.farmerName,
                         ),
                         _InfoRow(
-                          label: 'Locație Fermă',
-                          value: application.farmLocation,
+                          label: 'Crotalie Animal',
+                          value: application.animalTag,
                         ),
                         _InfoRow(
                           label: 'Efectiv Bovine',

@@ -362,26 +362,6 @@ class _FundingApplicationViewState extends State<FundingApplicationView> {
         child: Stepper(
           currentStep: _currentStep,
           onStepTapped: (step) => setState(() => _currentStep = step),
-          controlsBuilder: (context, details) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Row(
-                children: [
-                  if (_currentStep < 3)
-                    ElevatedButton(
-                      onPressed: details.onStepContinue,
-                      child: const Text('Continuă'),
-                    ),
-                  const SizedBox(width: 8),
-                  if (_currentStep > 0)
-                    TextButton(
-                      onPressed: details.onStepCancel,
-                      child: const Text('Înapoi'),
-                    ),
-                ],
-              ),
-            );
-          },
           onStepContinue: () {
             if (_currentStep < 3) {
               setState(() => _currentStep += 1);
