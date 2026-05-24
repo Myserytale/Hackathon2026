@@ -39,7 +39,7 @@ class _ReportBirthViewState extends State<ReportBirthView> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate() && _selectedSpecies != null) {
       final newAnimal = Animal(
         tagNumber: _tagNumberController.text,
@@ -52,8 +52,9 @@ class _ReportBirthViewState extends State<ReportBirthView> {
         ownerId: 1,
       );
 
-      context.read<AnimalViewModel>().addAnimal(newAnimal);
+      await context.read<AnimalViewModel>().addAnimal(newAnimal);
       
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Reported birth of animal with Tag: ${newAnimal.tagNumber}')),
       );
